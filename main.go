@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 
 	"database/sql"
 	_ "github.com/lib/pq"
@@ -29,6 +30,46 @@ func initDB() {
 	}
 
 	db = tmpDB
+}
+
+func save(table interface{}) {
+
+	typeOfTable := reflect.TypeOf(table)
+	valueOfTable := reflect.ValueOf(table)
+
+	tableName := typeOfTable.Name()
+
+	fields := make(map[string]string)
+	for i := 0; i < typeOfTable.NumField(); i++ {
+		fieldName := typeOfTable.Field(i).Name
+
+		if fieldName == "ID" && valueOfTable.Field(i).Int() <= 0 {
+			continue
+		}
+
+		if typeOfTable.Field(i).Type.Name() == "int" {
+			fields[fieldName] = strconv.Itoa(int(valueOfTable.Field(i).Int()))
+		}
+		if typeOfTable.Field(i).Type.Name() == "string" {
+			fields[fieldName] = "'" + valueOfTable.Field(i).String() + "'"
+		}
+	}
+
+	sqlInstruction := "insert into " + tableName + "("
+	sqlFields := ""
+	sqlValues := ""
+	for fieldName, value := range fields {
+		sqlFields = sqlFields + fieldName + ", "
+		sqlValues = sqlValues + value + ", "
+	}
+	sqlFields = sqlFields[:len(sqlFields)-2]
+	sqlValues = sqlValues[:len(sqlValues)-2]
+	sqlInstruction = sqlInstruction + sqlFields + ") values (" + sqlValues + ");"
+
+	result, err := db.Exec(sqlInstruction)
+	fmt.Printf("sqlInstruction: %v\n", sqlInstruction)
+	fmt.Printf("result: %v\n", result)
+	fmt.Printf("err: %v\n", err)
 }
 
 func createTable(table interface{}) {
@@ -66,4 +107,5 @@ func createTable(table interface{}) {
 func main() {
 	initDB()
 	createTable(Book{})
+	save(Book{Name: "moby dick", Pages: 199})
 }
