@@ -43,28 +43,36 @@ func save(table interface{}) {
 	for i := 0; i < typeOfTable.NumField(); i++ {
 		fieldName := typeOfTable.Field(i).Name
 
-		if fieldName == "ID" && valueOfTable.Field(i).Int() <= 0 {
-			continue
-		}
-
-		if typeOfTable.Field(i).Type.Name() == "int" {
-			fields[fieldName] = strconv.Itoa(int(valueOfTable.Field(i).Int()))
-		}
-		if typeOfTable.Field(i).Type.Name() == "string" {
-			fields[fieldName] = "'" + valueOfTable.Field(i).String() + "'"
+		if fieldName == "ID" {
+			fields[fieldName] = "serial"
+		} else {
+			if typeOfTable.Field(i).Type.Name() == "int" {
+				fields[fieldName] = strconv.Itoa(int(valueOfTable.Field(i).Int()))
+			}
+			if typeOfTable.Field(i).Type.Name() == "string" {
+				fields[fieldName] = "'" + valueOfTable.Field(i).String() + "'"
+			}
 		}
 	}
-
-	sqlInstruction := "insert into " + tableName + "("
-	sqlFields := ""
-	sqlValues := ""
-	for fieldName, value := range fields {
-		sqlFields = sqlFields + fieldName + ", "
-		sqlValues = sqlValues + value + ", "
+	sqlInstruction := "select 1"
+	id, _ := strconv.Atoi(fields["ID"])
+	if id > 0 {
+		//update
+	} else {
+		sqlInstruction = "insert into " + tableName + "("
+		sqlFields := ""
+		sqlValues := ""
+		for fieldName, value := range fields {
+			if fieldName == "ID" {
+				continue
+			}
+			sqlFields = sqlFields + fieldName + ", "
+			sqlValues = sqlValues + value + ", "
+		}
+		sqlFields = sqlFields[:len(sqlFields)-2]
+		sqlValues = sqlValues[:len(sqlValues)-2]
+		sqlInstruction = sqlInstruction + sqlFields + ") values (" + sqlValues + ");"
 	}
-	sqlFields = sqlFields[:len(sqlFields)-2]
-	sqlValues = sqlValues[:len(sqlValues)-2]
-	sqlInstruction = sqlInstruction + sqlFields + ") values (" + sqlValues + ");"
 
 	result, err := db.Exec(sqlInstruction)
 	fmt.Printf("sqlInstruction: %v\n", sqlInstruction)
@@ -90,7 +98,7 @@ func createTable(table interface{}) {
 		}
 
 		if fieldName == "ID" {
-			fieldsList = fieldsList + fieldName + " " + fieldType + " NOT NULL, "
+			fieldsList = fieldsList + fieldName + " serial NOT NULL, "
 		} else {
 			fieldsList = fieldsList + fieldName + " " + fieldType + ", "
 		}
