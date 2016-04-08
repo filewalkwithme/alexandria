@@ -43,22 +43,28 @@ func save(table interface{}) {
 	for i := 0; i < typeOfTable.NumField(); i++ {
 		fieldName := typeOfTable.Field(i).Name
 
-		if fieldName == "ID" {
-			fields[fieldName] = "serial"
-		} else {
-			if typeOfTable.Field(i).Type.Name() == "int" {
-				fields[fieldName] = strconv.Itoa(int(valueOfTable.Field(i).Int()))
-			}
-			if typeOfTable.Field(i).Type.Name() == "string" {
-				fields[fieldName] = "'" + valueOfTable.Field(i).String() + "'"
-			}
+		if typeOfTable.Field(i).Type.Name() == "int" {
+			fields[fieldName] = strconv.Itoa(int(valueOfTable.Field(i).Int()))
+		}
+		if typeOfTable.Field(i).Type.Name() == "string" {
+			fields[fieldName] = "'" + valueOfTable.Field(i).String() + "'"
 		}
 	}
 	sqlInstruction := "select 1"
 	id, _ := strconv.Atoi(fields["ID"])
 	if id > 0 {
 		//update
+		sqlInstruction = "update " + tableName + " set "
+		for fieldName, value := range fields {
+			if fieldName == "ID" {
+				continue
+			}
+			sqlInstruction = sqlInstruction + fieldName + " = " + value + ", "
+		}
+		sqlInstruction = sqlInstruction[:len(sqlInstruction)-2]
+		sqlInstruction = sqlInstruction + " where id = " + fields["ID"] + ";"
 	} else {
+		//insert
 		sqlInstruction = "insert into " + tableName + "("
 		sqlFields := ""
 		sqlValues := ""
@@ -75,6 +81,8 @@ func save(table interface{}) {
 	}
 
 	result, err := db.Exec(sqlInstruction)
+
+	//TODO: make save return or populate the ID field
 	fmt.Printf("sqlInstruction: %v\n", sqlInstruction)
 	fmt.Printf("result: %v\n", result)
 	fmt.Printf("err: %v\n", err)
@@ -116,4 +124,5 @@ func main() {
 	initDB()
 	createTable(Book{})
 	save(Book{Name: "moby dick", Pages: 199})
+	save(Book{ID: 1, Name: "moby dick2", Pages: 299})
 }
