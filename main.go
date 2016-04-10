@@ -32,6 +32,59 @@ func initDB() {
 	db = tmpDB
 }
 
+func find(table interface{}) interface{} {
+	typeOfTable := reflect.TypeOf(table)
+	valueOfTable := reflect.ValueOf(table)
+
+	tableName := typeOfTable.Name()
+	id := ""
+
+	var destFieds = make([]interface{}, typeOfTable.NumField())
+	var fields = make([]string, typeOfTable.NumField())
+	for i := 0; i < typeOfTable.NumField(); i++ {
+		fieldName := typeOfTable.Field(i).Name
+		if fieldName == "ID" {
+			id = strconv.Itoa(int(valueOfTable.Field(i).Int()))
+		}
+
+		if typeOfTable.Field(i).Type.Name() == "int" {
+			destFieds[i] = new(int)
+		}
+		if typeOfTable.Field(i).Type.Name() == "string" {
+			destFieds[i] = new(string)
+		}
+
+		fields[i] = fieldName
+	}
+
+	sqlInstruction := "select "
+	for _, fieldName := range fields {
+		sqlInstruction = sqlInstruction + fieldName + ", "
+	}
+	sqlInstruction = sqlInstruction[:len(sqlInstruction)-2]
+	sqlInstruction = sqlInstruction + " from " + tableName
+	sqlInstruction = sqlInstruction + " where id = " + id + ";"
+
+	fmt.Printf("sqlInstruction: %v\n", sqlInstruction)
+
+	err := db.QueryRow(sqlInstruction).Scan(destFieds...)
+	var res Book
+	if err == nil {
+		for i := 0; i < typeOfTable.NumField(); i++ {
+			if typeOfTable.Field(i).Type.Name() == "int" {
+				fmt.Printf("dest: %v\n", *(destFieds[i].(*int)))
+			}
+			if typeOfTable.Field(i).Type.Name() == "string" {
+				fmt.Printf("dest: %v\n", *(destFieds[i].(*string)))
+			}
+		}
+	} else {
+		fmt.Printf("err: %v\n", err)
+	}
+
+	return res
+}
+
 func save(table interface{}) {
 
 	typeOfTable := reflect.TypeOf(table)
@@ -122,7 +175,9 @@ func createTable(table interface{}) {
 
 func main() {
 	initDB()
-	createTable(Book{})
-	save(Book{Name: "moby dick", Pages: 199})
-	save(Book{ID: 1, Name: "moby dick2", Pages: 299})
+	//createTable(Book{})
+	//save(Book{Name: "moby dick", Pages: 199})
+	//save(Book{ID: 1, Name: "moby dick2", Pages: 299})
+	book := find(Book{ID: 1})
+	fmt.Printf("book: %v\n", book)
 }
