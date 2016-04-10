@@ -68,16 +68,18 @@ func find(table interface{}) interface{} {
 	fmt.Printf("sqlInstruction: %v\n", sqlInstruction)
 
 	err := db.QueryRow(sqlInstruction).Scan(destFieds...)
-	var res Book
+	res := Book{}
 	if err == nil {
+		p := reflect.ValueOf(&res)
 		for i := 0; i < typeOfTable.NumField(); i++ {
 			if typeOfTable.Field(i).Type.Name() == "int" {
-				fmt.Printf("dest: %v\n", *(destFieds[i].(*int)))
+				p.Elem().FieldByName(fields[i]).SetInt(int64(*(destFieds[i].(*int))))
 			}
 			if typeOfTable.Field(i).Type.Name() == "string" {
-				fmt.Printf("dest: %v\n", *(destFieds[i].(*string)))
+				p.Elem().FieldByName(fields[i]).SetString(*(destFieds[i].(*string)))
 			}
 		}
+
 	} else {
 		fmt.Printf("err: %v\n", err)
 	}
