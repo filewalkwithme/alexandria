@@ -32,6 +32,66 @@ func initDB() {
 	db = tmpDB
 }
 
+func findAll(table interface{}) []interface{} {
+	typeOfTable := reflect.TypeOf(table)
+
+	tableName := typeOfTable.Name()
+
+	var destFieds = make([]interface{}, typeOfTable.NumField())
+	var fields = make([]string, typeOfTable.NumField())
+	for i := 0; i < typeOfTable.NumField(); i++ {
+		fieldName := typeOfTable.Field(i).Name
+
+		if typeOfTable.Field(i).Type.Name() == "int" {
+			destFieds[i] = new(int)
+		}
+		if typeOfTable.Field(i).Type.Name() == "string" {
+			destFieds[i] = new(string)
+		}
+
+		fields[i] = fieldName
+	}
+
+	sqlInstruction := "select "
+	for _, fieldName := range fields {
+		sqlInstruction = sqlInstruction + fieldName + ", "
+	}
+	sqlInstruction = sqlInstruction[:len(sqlInstruction)-2]
+	sqlInstruction = sqlInstruction + " from " + tableName + ";"
+
+	fmt.Printf("sqlInstruction: %v\n", sqlInstruction)
+
+	var res []interface{}
+
+	rows, err := db.Query(sqlInstruction)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		err := rows.Scan(destFieds...)
+		var book Book
+
+		if err == nil {
+			p := reflect.ValueOf(&book)
+			for i := 0; i < typeOfTable.NumField(); i++ {
+				if typeOfTable.Field(i).Type.Name() == "int" {
+					p.Elem().FieldByName(fields[i]).SetInt(int64(*(destFieds[i].(*int))))
+				}
+				if typeOfTable.Field(i).Type.Name() == "string" {
+					p.Elem().FieldByName(fields[i]).SetString(*(destFieds[i].(*string)))
+				}
+			}
+			res = append(res, book)
+		} else {
+			fmt.Printf("err: %v\n", err)
+		}
+	}
+
+	return res
+}
+
 func find(table interface{}) interface{} {
 	typeOfTable := reflect.TypeOf(table)
 	valueOfTable := reflect.ValueOf(table)
@@ -180,6 +240,7 @@ func main() {
 	//createTable(Book{})
 	//save(Book{Name: "moby dick", Pages: 199})
 	//save(Book{ID: 1, Name: "moby dick2", Pages: 299})
-	book := find(Book{ID: 1})
-	fmt.Printf("book: %v\n", book)
+	//book := find(Book{ID: 1})
+	books := findAll(Book{})
+	fmt.Printf("book: %v\n", books)
 }
