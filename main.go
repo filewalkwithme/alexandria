@@ -208,6 +208,39 @@ func find(table interface{}) interface{} {
 	return res
 }
 
+func delete(table interface{}) int {
+	typeOfTable := reflect.TypeOf(table)
+	valueOfTable := reflect.ValueOf(table)
+
+	tableName := typeOfTable.Name()
+	id := ""
+
+	for i := 0; i < typeOfTable.NumField(); i++ {
+		fieldName := typeOfTable.Field(i).Name
+		if fieldName == "ID" {
+			id = strconv.Itoa(int(valueOfTable.Field(i).Int()))
+			break
+		}
+	}
+
+	sqlInstruction := "delete from " + tableName
+	sqlInstruction = sqlInstruction + " where id = " + id + ";"
+
+	result, err := db.Exec(sqlInstruction)
+
+	//TODO: make save return or populate the ID field
+	fmt.Printf("sqlInstruction: %v\n", sqlInstruction)
+	fmt.Printf("result: %v\n", result)
+	fmt.Printf("err: %v\n", err)
+
+	n, err := result.RowsAffected()
+	if err != nil {
+		fmt.Printf("err: %v\n", err)
+		return -1
+	}
+	return int(n)
+}
+
 func save(table interface{}) {
 
 	typeOfTable := reflect.TypeOf(table)
@@ -302,6 +335,8 @@ func main() {
 	//save(Book{Name: "moby dick", Pages: 199})
 	//save(Book{ID: 1, Name: "moby dick2", Pages: 299})
 	//book := find(Book{ID: 1})
+	delete(Book{ID: 5})
+
 	books := findAll(Book{})
 	fmt.Printf("book: %v\n", books)
 
