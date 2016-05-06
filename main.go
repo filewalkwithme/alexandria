@@ -241,6 +241,28 @@ func delete(table interface{}) int {
 	return int(n)
 }
 
+func deleteWhere(table interface{}, where string) int {
+	typeOfTable := reflect.TypeOf(table)
+
+	tableName := typeOfTable.Name()
+
+	sqlInstruction := "delete from " + tableName + " where " + where + ";"
+
+	result, err := db.Exec(sqlInstruction)
+
+	//TODO: make save return or populate the ID field
+	fmt.Printf("sqlInstruction: %v\n", sqlInstruction)
+	fmt.Printf("result: %v\n", result)
+	fmt.Printf("err: %v\n", err)
+
+	n, err := result.RowsAffected()
+	if err != nil {
+		fmt.Printf("err: %v\n", err)
+		return -1
+	}
+	return int(n)
+}
+
 func deleteAll(table interface{}) int {
 	typeOfTable := reflect.TypeOf(table)
 
@@ -358,7 +380,7 @@ func main() {
 	//save(Book{ID: 1, Name: "moby dick2", Pages: 299})
 	//book := find(Book{ID: 1})
 	//deleteAll(Book{})
-
+	deleteWhere(Book{}, "id = 12")
 	books := findAll(Book{})
 	fmt.Printf("book: %v\n", books)
 
