@@ -341,11 +341,25 @@ func save(table interface{}) {
 	fmt.Printf("err: %v\n", err)
 }
 
+type dbField struct {
+	name   string
+	dbType string
+}
+
+type dbTable struct {
+	name   string
+	fields []dbField
+}
+
+var tables []dbTable
+
 func createTable(table interface{}) {
+	tmpTable := dbTable{}
 
 	typeOfTable := reflect.TypeOf(table)
 
 	tableName := typeOfTable.Name()
+	tmpTable.name = tableName
 
 	fieldsList := ""
 	for i := 0; i < typeOfTable.NumField(); i++ {
@@ -363,27 +377,37 @@ func createTable(table interface{}) {
 		} else {
 			fieldsList = fieldsList + fieldName + " " + fieldType + ", "
 		}
+
+		tmpField := dbField{}
+		tmpField.name = fieldName
+		tmpField.dbType = fieldType
+		tmpTable.fields = append(tmpTable.fields, tmpField)
 	}
 
 	primaryKey := "constraint " + tableName + "_pkey primary key (id)"
 	sqlInstruction := "create table " + tableName + " (" + fieldsList + " " + primaryKey + ");\n"
 
 	result, err := db.Exec(sqlInstruction)
+
 	fmt.Printf("result: %v\n", result)
 	fmt.Printf("err: %v\n", err)
+
+	tables = append(tables, tmpTable)
+	fmt.Printf("tables: %v\n", tables)
+
 }
 
 func main() {
 	initDB()
-	//createTable(Book{})
-	save(Book{Name: "moby dick", Pages: 199})
+	createTable(Book{})
+	//save(Book{Name: "moby dick", Pages: 199})
 	//save(Book{ID: 1, Name: "moby dick2", Pages: 299})
 	//book := find(Book{ID: 1})
 	//deleteAll(Book{})
-	deleteWhere(Book{}, "id = 12")
-	books := findAll(Book{})
-	fmt.Printf("book: %v\n", books)
+	//deleteWhere(Book{}, "id = 12")
+	//books := findAll(Book{})
+	//fmt.Printf("book: %v\n", books)
 
-	books = findWhere(Book{}, "id > 3 and id < 20")
-	fmt.Printf("book: %v\n", books)
+	//books = findWhere(Book{}, "id > 3 and id < 20")
+	//fmt.Printf("book: %v\n", books)
 }
