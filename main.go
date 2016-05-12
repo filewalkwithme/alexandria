@@ -351,37 +351,52 @@ type dbTable struct {
 	fields []dbField
 }
 
-var tables []dbTable
+var tables = make(map[string]dbTable)
 
-func createTable(table interface{}) {
+func loadToMemory(table interface{}) {
 	tmpTable := dbTable{}
 
 	typeOfTable := reflect.TypeOf(table)
-
 	tableName := typeOfTable.Name()
-	tmpTable.name = tableName
+	if _, exists := tables[tableName]; exists == false {
+		tmpTable.name = tableName
+
+		for i := 0; i < typeOfTable.NumField(); i++ {
+			fieldName := typeOfTable.Field(i).Name
+			fieldType := ""
+			if typeOfTable.Field(i).Type.Name() == "int" {
+				fieldType = "integer"
+			}
+			if typeOfTable.Field(i).Type.Name() == "string" {
+				fieldType = "character varying"
+			}
+
+			tmpField := dbField{}
+			tmpField.name = fieldName
+			tmpField.dbType = fieldType
+			tmpTable.fields = append(tmpTable.fields, tmpField)
+		}
+
+		tables[tableName] = tmpTable
+	}
+}
+
+func createTable(table interface{}) {
+	loadToMemory(table)
+
+	tableName := reflect.TypeOf(table).Name()
+	dbTable := tables[tableName]
 
 	fieldsList := ""
-	for i := 0; i < typeOfTable.NumField(); i++ {
-		fieldName := typeOfTable.Field(i).Name
-		fieldType := ""
-		if typeOfTable.Field(i).Type.Name() == "int" {
-			fieldType = "integer"
-		}
-		if typeOfTable.Field(i).Type.Name() == "string" {
-			fieldType = "character varying"
-		}
+	for _, field := range dbTable.fields {
+		fieldName := field.name
+		fieldType := field.dbType
 
 		if fieldName == "ID" {
 			fieldsList = fieldsList + fieldName + " serial NOT NULL, "
 		} else {
 			fieldsList = fieldsList + fieldName + " " + fieldType + ", "
 		}
-
-		tmpField := dbField{}
-		tmpField.name = fieldName
-		tmpField.dbType = fieldType
-		tmpTable.fields = append(tmpTable.fields, tmpField)
 	}
 
 	primaryKey := "constraint " + tableName + "_pkey primary key (id)"
@@ -391,10 +406,6 @@ func createTable(table interface{}) {
 
 	fmt.Printf("result: %v\n", result)
 	fmt.Printf("err: %v\n", err)
-
-	tables = append(tables, tmpTable)
-	fmt.Printf("tables: %v\n", tables)
-
 }
 
 func main() {
