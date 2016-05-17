@@ -408,9 +408,24 @@ func createTable(table interface{}) {
 	fmt.Printf("err: %v\n", err)
 }
 
+type Finder struct {
+}
+
+func (f Finder) First() {
+	fmt.Printf("first!")
+}
+
+func find_(table interface{}) Finder {
+
+	return Finder{}
+}
+
 func main() {
-	initDB()
-	createTable(Book{})
+
+	find_(Book{}).First()
+
+	//initDB()
+	//createTable(Book{})
 	//save(Book{Name: "moby dick", Pages: 199})
 	//save(Book{ID: 1, Name: "moby dick2", Pages: 299})
 	//book := find(Book{ID: 1})
