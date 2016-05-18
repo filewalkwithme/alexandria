@@ -5,7 +5,7 @@ import (
 	"reflect"
 )
 
-func (orm Orm) findAll(table interface{}) []interface{} {
+func (f Finder) findAll(table interface{}) []interface{} {
 	typeOfTable := reflect.TypeOf(table)
 
 	tableName := typeOfTable.Name()
@@ -36,7 +36,7 @@ func (orm Orm) findAll(table interface{}) []interface{} {
 
 	var res []interface{}
 
-	rows, err := orm.db.Query(sqlInstruction)
+	rows, err := f.db.Query(sqlInstruction)
 	if err != nil {
 		fmt.Printf("%v\n", err)
 	}

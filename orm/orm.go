@@ -2,7 +2,7 @@ package orm
 
 import (
 	"database/sql"
-	"fmt"
+	//"fmt"
 
 	//needed to access postgres
 	_ "github.com/lib/pq"
@@ -33,17 +33,15 @@ func ConnectToPostgres() (Orm, error) {
 //Finder represents the result of a find operation
 type Finder struct {
 	table interface{}
+	db    *sql.DB
 }
 
 //All returns an array containing all results of a SELECT
 func (f Finder) All() []interface{} {
-	fmt.Printf("First: %v\n", f.table)
-	return nil
+	return f.findAll(f.table)
 }
 
 //Find perform a SELECT operation
 func (orm Orm) Find(table interface{}) Finder {
-	x := orm.findAll(table)
-	fmt.Printf("%v\n", x)
-	return Finder{}
+	return Finder{db: orm.db, table: table}
 }
