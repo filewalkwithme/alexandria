@@ -35,13 +35,15 @@ type Finder struct {
 	table interface{}
 }
 
-//First returns the first position of a collection
-func (f Finder) First() interface{} {
+//All returns an array containing all results of a SELECT
+func (f Finder) All() []interface{} {
 	fmt.Printf("First: %v\n", f.table)
 	return nil
 }
 
 //Find perform a SELECT operation
 func (orm Orm) Find(table interface{}) Finder {
+	x := orm.findAll(table)
+	fmt.Printf("%v\n", x)
 	return Finder{}
 }

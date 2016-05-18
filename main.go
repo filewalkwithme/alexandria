@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	alexandriaOrm "github.com/maiconio/alexandria/orm"
 )
 
@@ -20,6 +19,5 @@ func main() {
 	}
 
 	//find the first book
-	book := orm.Find(Book{}).First()
-	fmt.Printf("%v\n", book)
+	orm.Find(Book{}).All()
 }
