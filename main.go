@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	alexandriaOrm "github.com/maiconio/alexandria/orm"
+	alexandria "github.com/maiconio/alexandria/orm"
 )
 
 //Book is on the table
@@ -14,7 +14,7 @@ type Book struct {
 
 func main() {
 	//connect on postgres
-	orm, err := alexandriaOrm.ConnectToPostgres()
+	orm, err := alexandria.ConnectToPostgres()
 
 	if err != nil {
 		panic(err)
@@ -22,6 +22,10 @@ func main() {
 
 	//finds all books
 	books := orm.Find(Book{}).All()
-
 	fmt.Printf("%v\n", books)
+
+	//finds book with ID=1
+	book := orm.Find(Book{ID: 1}).One()
+	fmt.Printf("%v\n", book)
+
 }

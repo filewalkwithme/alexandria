@@ -41,6 +41,11 @@ func (f Finder) All() []interface{} {
 	return f.findAll(f.table)
 }
 
+//One returns a single object which matches a given ID
+func (f Finder) One() interface{} {
+	return f.find(f.table)
+}
+
 //Find perform a SELECT operation
 func (orm Orm) Find(table interface{}) Finder {
 	return Finder{db: orm.db, table: table}
