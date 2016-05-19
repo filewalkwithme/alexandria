@@ -28,4 +28,7 @@ func main() {
 	book := orm.Find(Book{ID: 1}).One()
 	fmt.Printf("%v\n", book)
 
+	//finds book with pages >= 3
+	largeBooks := orm.Find(Book{}).Where("pages >= 3")
+	fmt.Printf("%v\n", largeBooks)
 }

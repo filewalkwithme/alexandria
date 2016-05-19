@@ -46,6 +46,11 @@ func (f Finder) One() interface{} {
 	return f.find(f.table)
 }
 
+//Where returns an array containing all results of a SELECT
+func (f Finder) Where(where string) []interface{} {
+	return f.findWhere(f.table, where)
+}
+
 //Find perform a SELECT operation
 func (orm Orm) Find(table interface{}) Finder {
 	return Finder{db: orm.db, table: table}
