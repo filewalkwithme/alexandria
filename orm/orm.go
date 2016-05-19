@@ -55,3 +55,8 @@ func (f Finder) Where(where string) []interface{} {
 func (orm Orm) Find(table interface{}) Finder {
 	return Finder{db: orm.db, table: table}
 }
+
+//Save perform an INSERT operation
+func (orm Orm) Save(table interface{}) (interface{}, error) {
+	return orm.save(table)
+}
