@@ -39,4 +39,12 @@ func main() {
 	//finds book with pages >= 3
 	largeBooks := orm.Find(Book{}).Where("pages >= 3")
 	fmt.Printf("%v\n", largeBooks)
+
+	//delete book with ID=1
+	orm.Delete(Book{ID: 1})
+	//finds all books
+
+	books = orm.Find(Book{}).All()
+	fmt.Printf("%v\n", books)
+
 }

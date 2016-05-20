@@ -60,3 +60,8 @@ func (orm Orm) Find(table interface{}) Finder {
 func (orm Orm) Save(table interface{}) (interface{}, error) {
 	return orm.save(table)
 }
+
+//Delete perform a SELECT operation
+func (orm Orm) Delete(table interface{}) {
+	orm.delete(table)
+}
