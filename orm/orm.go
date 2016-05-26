@@ -53,6 +53,11 @@ func (orm Orm) Handle(table interface{}) Handler {
 	return Handler{db: orm.db, table: table}
 }
 
+//CreateTable ...
+func (handler Handler) CreateTable() error {
+	return handler.createTable()
+}
+
 //Save perform an INSERT operation
 func (handler Handler) Save(table interface{}) (interface{}, error) {
 	return handler.save(table)
