@@ -30,6 +30,30 @@ func ConnectToPostgres() (Orm, error) {
 	return orm, nil
 }
 
+//Handler manipulates the table (create/destroy/save/finde/delete)
+type Handler struct {
+	table interface{}
+	db    *sql.DB
+}
+
+//Handle returns a Handler object to manipulate the given table
+func (orm Orm) Handle(table interface{}) Handler {
+	return Handler{db: orm.db, table: table}
+}
+
+//Save perform an INSERT operation
+func (handler Handler) Save(table interface{}) (interface{}, error) {
+	return handler.save(table)
+}
+
+//----------------------------
+
+//Deleter represents a delete operation
+type Deleter struct {
+	table interface{}
+	db    *sql.DB
+}
+
 //Finder represents the result of a find operation
 type Finder struct {
 	table interface{}
@@ -58,10 +82,11 @@ func (orm Orm) Find(table interface{}) Finder {
 
 //Save perform an INSERT operation
 func (orm Orm) Save(table interface{}) (interface{}, error) {
-	return orm.save(table)
+	//return orm.save(table)
+	return table, nil
 }
 
-//Delete perform a SELECT operation
+//Delete perform a DELETE operation
 func (orm Orm) Delete(table interface{}) {
 	orm.delete(table)
 }

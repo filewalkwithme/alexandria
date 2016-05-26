@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-func (orm Orm) save(table interface{}) (interface{}, error) {
+func (handler Handler) save(table interface{}) (interface{}, error) {
 
 	typeOfTable := reflect.TypeOf(table)
 	valueOfTable := reflect.ValueOf(table)
@@ -53,7 +53,7 @@ func (orm Orm) save(table interface{}) (interface{}, error) {
 		sqlInstruction = sqlInstruction + sqlFields + ") values (" + sqlValues + ");"
 	}
 
-	_, err := orm.db.Exec(sqlInstruction)
+	_, err := handler.db.Exec(sqlInstruction)
 
 	//TODO: make save return the new object
 	return nil, err

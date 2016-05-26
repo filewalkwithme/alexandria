@@ -13,38 +13,29 @@ type Book struct {
 }
 
 func main() {
+	//the new fabulous alexandria command set
+	//
+	//orm := alexandria.ConnectToPostgres("127.0.0.1:3452", "postgres")
+	//ormBooks := orm.Handle(book)
+	//ormBooks.CreateTable()
+	//ormBooks.DestroyTable()
+	//ormBooks.Save(book)
+	//ormBooks.Find().Where("id=abcd")
+	//ormBooks.Find().ID(123)
+	//ormBooks.Find().All()
+	//ormBooks.Delete().Where("id=abcd")
+	//ormBooks.Delete().ID(123)
+	//ormBooks.Delete().All()
+
 	//connect on postgres
 	orm, err := alexandria.ConnectToPostgres()
-
 	if err != nil {
 		panic(err)
 	}
 
-	//Create a new book
-	newBook, err := orm.Save(Book{Name: "Fight Club", Pages: 198})
-	fmt.Printf("%v\n", newBook)
-	fmt.Printf("%v\n", err)
+	ormBooks := orm.Handle(Book{})
 
-	//update an existing one
-	orm.Save(Book{ID: 1, Name: "Fight Club UPDATED!", Pages: 198})
-
-	//finds all books
-	books := orm.Find(Book{}).All()
-	fmt.Printf("%v\n", books)
-
-	//finds book with ID=1
-	book := orm.Find(Book{ID: 1}).One()
-	fmt.Printf("%v\n", book)
-
-	//finds book with pages >= 3
-	largeBooks := orm.Find(Book{}).Where("pages >= 3")
-	fmt.Printf("%v\n", largeBooks)
-
-	//delete book with ID=1
-	orm.Delete(Book{ID: 1})
-	//finds all books
-
-	books = orm.Find(Book{}).All()
-	fmt.Printf("%v\n", books)
+	book, _ := ormBooks.Save(Book{Name: "Fight Club", Pages: 198})
+	fmt.Printf("book: %v\n", book)
 
 }
