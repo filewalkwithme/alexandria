@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	alexandria "github.com/maiconio/alexandria/orm"
 )
 
@@ -16,7 +17,10 @@ func main() {
 	orm, _ := alexandria.ConnectToPostgres()
 	ormBooks := orm.Handle(Book{})
 
-	ormBooks.CreateTable()
+	//ormBooks.CreateTable()
+	err := ormBooks.DestroyTable()
+	fmt.Printf("err: %v\n", err)
+
 	//ormBooks.Save(Book{Name: "Fight Club", Pages: 198})
 	//ormBooks.Find().Where("pages > 0")
 	//ormBooks.Find().ByID(9)

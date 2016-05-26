@@ -72,3 +72,12 @@ func (handler Handler) createTable() error {
 	fmt.Printf("err: %v\n", err)
 	return err
 }
+
+func (handler Handler) destroyTable() error {
+	tableName := reflect.TypeOf(handler.table).Name()
+	sqlInstruction := "drop table " + tableName + ";"
+
+	_, err := handler.db.Exec(sqlInstruction)
+
+	return err
+}

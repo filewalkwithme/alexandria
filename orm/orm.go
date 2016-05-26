@@ -58,6 +58,11 @@ func (handler Handler) CreateTable() error {
 	return handler.createTable()
 }
 
+//DestroyTable ...
+func (handler Handler) DestroyTable() error {
+	return handler.destroyTable()
+}
+
 //Save perform an INSERT operation
 func (handler Handler) Save(table interface{}) (interface{}, error) {
 	return handler.save(table)
