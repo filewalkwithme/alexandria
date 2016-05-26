@@ -88,4 +88,14 @@ func (d Deleter) Where(where string) int {
 	return d.deleteWhere(d.table, where)
 }
 
+//ByID perform a DELETE operation
+func (d Deleter) ByID(id int) int {
+	return d.deleteByID(d.table, id)
+}
+
+//All perform a DELETE operation
+func (d Deleter) All() int {
+	return d.deleteAll(d.table)
+}
+
 //----------------------------

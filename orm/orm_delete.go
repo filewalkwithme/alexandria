@@ -6,23 +6,12 @@ import (
 	"strconv"
 )
 
-func (deleter Deleter) delete(table interface{}) int {
+func (deleter Deleter) deleteByID(table interface{}, id int) int {
 	typeOfTable := reflect.TypeOf(table)
-	valueOfTable := reflect.ValueOf(table)
-
 	tableName := typeOfTable.Name()
-	id := ""
-
-	for i := 0; i < typeOfTable.NumField(); i++ {
-		fieldName := typeOfTable.Field(i).Name
-		if fieldName == "ID" {
-			id = strconv.Itoa(int(valueOfTable.Field(i).Int()))
-			break
-		}
-	}
 
 	sqlInstruction := "delete from " + tableName
-	sqlInstruction = sqlInstruction + " where id = " + id + ";"
+	sqlInstruction = sqlInstruction + " where id = " + strconv.Itoa(id) + ";"
 
 	result, err := deleter.db.Exec(sqlInstruction)
 
@@ -40,6 +29,28 @@ func (deleter Deleter) deleteWhere(table interface{}, where string) int {
 	tableName := typeOfTable.Name()
 
 	sqlInstruction := "delete from " + tableName + " where " + where + ";"
+
+	result, err := deleter.db.Exec(sqlInstruction)
+
+	//TODO: make save return or populate the ID field
+	fmt.Printf("sqlInstruction: %v\n", sqlInstruction)
+	fmt.Printf("result: %v\n", result)
+	fmt.Printf("err: %v\n", err)
+
+	n, err := result.RowsAffected()
+	if err != nil {
+		fmt.Printf("err: %v\n", err)
+		return -1
+	}
+	return int(n)
+}
+
+func (deleter Deleter) deleteAll(table interface{}) int {
+	typeOfTable := reflect.TypeOf(table)
+
+	tableName := typeOfTable.Name()
+
+	sqlInstruction := "delete from " + tableName + ";"
 
 	result, err := deleter.db.Exec(sqlInstruction)
 
