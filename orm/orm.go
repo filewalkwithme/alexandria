@@ -36,6 +36,12 @@ type Handler struct {
 	db    *sql.DB
 }
 
+//Finder represents the result of a find operation
+type Finder struct {
+	table interface{}
+	db    *sql.DB
+}
+
 //Handle returns a Handler object to manipulate the given table
 func (orm Orm) Handle(table interface{}) Handler {
 	return Handler{db: orm.db, table: table}
@@ -46,16 +52,20 @@ func (handler Handler) Save(table interface{}) (interface{}, error) {
 	return handler.save(table)
 }
 
+//Find returns a Finder object
+func (handler Handler) Find() Finder {
+	return Finder{db: handler.db, table: handler.table}
+}
+
+//Where returns an array containing all results of a SELECT
+func (f Finder) Where(where string) []interface{} {
+	return f.findWhere(f.table, where)
+}
+
 //----------------------------
 
 //Deleter represents a delete operation
 type Deleter struct {
-	table interface{}
-	db    *sql.DB
-}
-
-//Finder represents the result of a find operation
-type Finder struct {
 	table interface{}
 	db    *sql.DB
 }
@@ -68,11 +78,6 @@ func (f Finder) All() []interface{} {
 //One returns a single object which matches a given ID
 func (f Finder) One() interface{} {
 	return f.find(f.table)
-}
-
-//Where returns an array containing all results of a SELECT
-func (f Finder) Where(where string) []interface{} {
-	return f.findWhere(f.table, where)
 }
 
 //Find perform a SELECT operation

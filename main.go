@@ -35,7 +35,10 @@ func main() {
 
 	ormBooks := orm.Handle(Book{})
 
-	book, _ := ormBooks.Save(Book{Name: "Fight Club", Pages: 198})
-	fmt.Printf("book: %v\n", book)
+	ormBooks.Save(Book{Name: "Fight Club", Pages: 198})
+
+	books := ormBooks.Find().Where("pages > 0")
+
+	fmt.Printf("book: %v\n", books)
 
 }
