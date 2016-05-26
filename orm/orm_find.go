@@ -6,20 +6,14 @@ import (
 	"strconv"
 )
 
-func (f Finder) find(table interface{}) interface{} {
+func (f Finder) findByID(table interface{}, id int) interface{} {
 	typeOfTable := reflect.TypeOf(table)
-	valueOfTable := reflect.ValueOf(table)
-
 	tableName := typeOfTable.Name()
-	id := ""
 
 	var destFieds = make([]interface{}, typeOfTable.NumField())
 	var fields = make([]string, typeOfTable.NumField())
 	for i := 0; i < typeOfTable.NumField(); i++ {
 		fieldName := typeOfTable.Field(i).Name
-		if fieldName == "ID" {
-			id = strconv.Itoa(int(valueOfTable.Field(i).Int()))
-		}
 
 		if typeOfTable.Field(i).Type.Name() == "int" {
 			destFieds[i] = new(int)
@@ -37,7 +31,7 @@ func (f Finder) find(table interface{}) interface{} {
 	}
 	sqlInstruction = sqlInstruction[:len(sqlInstruction)-2]
 	sqlInstruction = sqlInstruction + " from " + tableName
-	sqlInstruction = sqlInstruction + " where id = " + id + ";"
+	sqlInstruction = sqlInstruction + " where id = " + strconv.Itoa(id) + ";"
 
 	fmt.Printf("sqlInstruction: %v\n", sqlInstruction)
 

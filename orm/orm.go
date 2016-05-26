@@ -42,6 +42,12 @@ type Finder struct {
 	db    *sql.DB
 }
 
+//Deleter represents a delete operation
+type Deleter struct {
+	table interface{}
+	db    *sql.DB
+}
+
 //Handle returns a Handler object to manipulate the given table
 func (orm Orm) Handle(table interface{}) Handler {
 	return Handler{db: orm.db, table: table}
@@ -62,12 +68,9 @@ func (f Finder) Where(where string) []interface{} {
 	return f.findWhere(f.table, where)
 }
 
-//----------------------------
-
-//Deleter represents a delete operation
-type Deleter struct {
-	table interface{}
-	db    *sql.DB
+//ByID returns an array containing all results of a SELECT
+func (f Finder) ByID(id int) interface{} {
+	return f.findByID(f.table, id)
 }
 
 //All returns an array containing all results of a SELECT
@@ -75,23 +78,14 @@ func (f Finder) All() []interface{} {
 	return f.findAll(f.table)
 }
 
-//One returns a single object which matches a given ID
-func (f Finder) One() interface{} {
-	return f.find(f.table)
+//Delete returns a Finder object
+func (handler Handler) Delete() Deleter {
+	return Deleter{db: handler.db, table: handler.table}
 }
 
-//Find perform a SELECT operation
-func (orm Orm) Find(table interface{}) Finder {
-	return Finder{db: orm.db, table: table}
+//Where perform a DELETE operation
+func (d Deleter) Where(where string) int {
+	return d.deleteWhere(d.table, where)
 }
 
-//Save perform an INSERT operation
-func (orm Orm) Save(table interface{}) (interface{}, error) {
-	//return orm.save(table)
-	return table, nil
-}
-
-//Delete perform a DELETE operation
-func (orm Orm) Delete(table interface{}) {
-	orm.delete(table)
-}
+//----------------------------

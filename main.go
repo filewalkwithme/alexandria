@@ -21,7 +21,7 @@ func main() {
 	//ormBooks.DestroyTable()
 	//ormBooks.Save(book)
 	//ormBooks.Find().Where("id=abcd")
-	//ormBooks.Find().ID(123)
+	//ormBooks.Find().ByID(123)
 	//ormBooks.Find().All()
 	//ormBooks.Delete().Where("id=abcd")
 	//ormBooks.Delete().ID(123)
@@ -36,9 +36,12 @@ func main() {
 	ormBooks := orm.Handle(Book{})
 
 	ormBooks.Save(Book{Name: "Fight Club", Pages: 198})
+	ormBooks.Find().Where("pages > 0")
+	ormBooks.Find().ByID(9)
+	ormBooks.Find().All()
 
-	books := ormBooks.Find().Where("pages > 0")
+	count := ormBooks.Delete().Where("id=9")
 
-	fmt.Printf("book: %v\n", books)
+	fmt.Printf("count: %v\n", count)
 
 }
