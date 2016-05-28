@@ -58,9 +58,9 @@ func (handler Handler) CreateTable() error {
 	return handler.createTable()
 }
 
-//DestroyTable ...
-func (handler Handler) DestroyTable() error {
-	return handler.destroyTable()
+//DropTable ...
+func (handler Handler) DropTable() error {
+	return handler.dropTable()
 }
 
 //Save perform an INSERT operation

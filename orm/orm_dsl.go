@@ -73,7 +73,7 @@ func (handler Handler) createTable() error {
 	return err
 }
 
-func (handler Handler) destroyTable() error {
+func (handler Handler) dropTable() error {
 	tableName := reflect.TypeOf(handler.table).Name()
 	sqlInstruction := "drop table " + tableName + ";"
 
