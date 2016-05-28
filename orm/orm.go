@@ -32,8 +32,9 @@ func ConnectToPostgres() (Orm, error) {
 
 //Handler manipulates the table (create/destroy/save/finde/delete)
 type Handler struct {
-	table interface{}
-	db    *sql.DB
+	table          interface{}
+	db             *sql.DB
+	sqlCreateTable string
 }
 
 //Finder represents the result of a find operation
@@ -48,12 +49,12 @@ type Deleter struct {
 	db    *sql.DB
 }
 
-//Handle returns a Handler object to manipulate the given table
-func (orm Orm) Handle(table interface{}) Handler {
+//NewHandler returns a Handler object to manipulate a given table
+func (orm Orm) NewHandler(table interface{}) Handler {
 	return Handler{db: orm.db, table: table}
 }
 
-//CreateTable ...
+//CreateTable is just a wrapper for the internal method createTable
 func (handler Handler) CreateTable() error {
 	return handler.createTable()
 }
