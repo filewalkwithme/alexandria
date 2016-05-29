@@ -66,5 +66,37 @@ func TestCreateTable(t *testing.T) {
 	if err.Error() != "ID field not found on struct DSLTestWithoutID" {
 		t.Fatalf("err: %v", err.Error())
 	}
+}
 
+func TestAssembleSQLDropTable(t *testing.T) {
+	var handler Handler
+	handler.table = DSLTest{}
+
+	expected := `drop table DSLTest;`
+	got := handler.assembleSQLDropTable()
+	if got != expected {
+		t.Fatalf("\nExpected:\t %v\nGot:\t\t %v\n", expected, got)
+	}
+}
+
+func TestDropTable(t *testing.T) {
+	//connect to Postgres
+	orm, scream := ConnectToPostgres()
+	if scream != nil {
+		panic(scream)
+	}
+
+	ormTest := orm.NewHandler(DSLTest{})
+	ormTest.CreateTable()
+	err := ormTest.DropTable()
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+
+	ormTest.CreateTable()
+	ormTest.sqlDropTable = "super wrong sql"
+	err = ormTest.DropTable()
+	if err.Error() != "pq: syntax error at or near \"super\"" {
+		t.Fatalf("%v", err.Error())
+	}
 }
