@@ -8,7 +8,7 @@ import (
 // createTableSQL() must traverse the table structure, colect its fields and
 // assemble the sql CREATE TABLE instruction
 func (handler Handler) assembleSQLCreateTable() (string, error) {
-	var existsID = false
+	var idExists = false
 
 	typeOfTable := reflect.TypeOf(handler.table)
 	tableName := typeOfTable.Name()
@@ -25,14 +25,14 @@ func (handler Handler) assembleSQLCreateTable() (string, error) {
 		}
 
 		if fieldName == "ID" {
-			existsID = true
+			idExists = true
 			fieldsList = fieldsList + fieldName + " serial NOT NULL, "
 		} else {
 			fieldsList = fieldsList + fieldName + " " + fieldType + ", "
 		}
 	}
 
-	if existsID == false {
+	if idExists == false {
 		return "", fmt.Errorf("ID field not found on struct %v", tableName)
 	}
 
