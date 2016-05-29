@@ -3,6 +3,7 @@ package orm
 import (
 	"database/sql"
 	//"fmt"
+	"reflect"
 
 	//needed to access postgres
 	_ "github.com/lib/pq"
@@ -33,6 +34,7 @@ func ConnectToPostgres() (Orm, error) {
 //Handler manipulates the table (create/destroy/save/finde/delete)
 type Handler struct {
 	table          interface{}
+	tableName      string
 	db             *sql.DB
 	sqlCreateTable string
 	sqlDropTable   string
@@ -52,7 +54,9 @@ type Deleter struct {
 
 //NewHandler returns a Handler object to manipulate a given table
 func (orm Orm) NewHandler(table interface{}) Handler {
-	return Handler{db: orm.db, table: table}
+	typeOfTable := reflect.TypeOf(table)
+	tableName := typeOfTable.Name()
+	return Handler{db: orm.db, table: table, tableName: tableName}
 }
 
 //CreateTable is just a wrapper for the internal method createTable
@@ -60,14 +64,15 @@ func (handler Handler) CreateTable() error {
 	return handler.createTable()
 }
 
-//DropTable ...
+//DropTable is just a wrapper for the internal method dropTable
 func (handler Handler) DropTable() error {
 	return handler.dropTable()
 }
 
-//Save perform an INSERT operation
-func (handler Handler) Save(table interface{}) (interface{}, error) {
-	return handler.save(table)
+//Insert is just a wrapper for the internal method insert
+func (handler Handler) Insert(object interface{}) error {
+	err := handler.insert(object)
+	return err
 }
 
 //Find returns a Finder object
