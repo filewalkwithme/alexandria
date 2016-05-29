@@ -35,6 +35,7 @@ type Handler struct {
 	table          interface{}
 	db             *sql.DB
 	sqlCreateTable string
+	sqlDropTable   string
 }
 
 //Finder represents the result of a find operation

@@ -61,9 +61,25 @@ func (handler Handler) createTable() (err error) {
 	return err
 }
 
-func (handler Handler) dropTable() error {
+// assembleSQLDropTable() assemble the SQL Drop Table instruction
+func (handler Handler) assembleSQLDropTable() string {
 	tableName := reflect.TypeOf(handler.table).Name()
 	sqlInstruction := "drop table " + tableName + ";"
+
+	handler.sqlDropTable = sqlInstruction
+
+	return sqlInstruction
+}
+
+// createTable() must execute the sql DROP TABLE instruction
+func (handler Handler) dropTable() error {
+	sqlInstruction := ""
+
+	if handler.sqlDropTable != "" {
+		sqlInstruction = handler.sqlDropTable
+	} else {
+		sqlInstruction = handler.assembleSQLDropTable()
+	}
 
 	_, err := handler.db.Exec(sqlInstruction)
 
