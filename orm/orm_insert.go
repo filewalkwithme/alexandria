@@ -14,12 +14,9 @@ type saveField struct {
 // assembleSQLInsertStatement traverse the the object
 // returns a SQL insert instruction and a string array containing the exact
 // parameters order
-func (handler Handler) assembleSQLInsertStatement(object interface{}) (string, []saveField, error) {
-	typeOfTable := reflect.TypeOf(object)
+func (handler *Handler) assembleSQLInsertStatement() error {
+	typeOfTable := reflect.TypeOf(handler.table)
 	tableName := typeOfTable.Name()
-	if tableName != handler.tableName {
-		return "", nil, fmt.Errorf("Object table name (%v) is diferent from handler table name (%v)", tableName, handler.tableName)
-	}
 
 	sqlInstruction := "insert into " + tableName + "("
 
@@ -45,7 +42,10 @@ func (handler Handler) assembleSQLInsertStatement(object interface{}) (string, [
 	sqlValues = sqlValues[:len(sqlValues)-2]
 	sqlInstruction = sqlInstruction + sqlFields + ") values (" + sqlValues + ");"
 
-	return sqlInstruction, fieldMap, nil
+	handler.sqlInsert = sqlInstruction
+	handler.mapInsert = fieldMap
+
+	return nil
 }
 
 // assembleSQLInsertStatement traverse the the object
@@ -89,14 +89,8 @@ func (handler Handler) insert(object interface{}) error {
 		return fmt.Errorf("Object table name (%v) is diferent from handler table name (%v)", tableName, handler.tableName)
 	}
 
-	//insert
-	sqlInsert, mapInsert, err := handler.assembleSQLInsertStatement(object)
-	if err != nil {
-		return err
-	}
-
 	var args []interface{}
-	for _, field := range mapInsert {
+	for _, field := range handler.mapInsert {
 		if field.fieldType == "int" {
 			args = append(args, int(valueOfTable.FieldByName(field.name).Int()))
 		}
@@ -104,7 +98,8 @@ func (handler Handler) insert(object interface{}) error {
 			args = append(args, string(valueOfTable.FieldByName(field.name).String()))
 		}
 	}
-	_, err = handler.db.Exec(sqlInsert, args...)
+	fmt.Printf("%v\n", handler.sqlInsert)
+	_, err := handler.db.Exec(handler.sqlInsert, args...)
 
 	return err
 }

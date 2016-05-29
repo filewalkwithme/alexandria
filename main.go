@@ -20,7 +20,10 @@ func main() {
 	}
 
 	//create the orm handler for Book objects
-	ormBooks := orm.NewHandler(Book{})
+	ormBooks, scream := orm.NewHandler(Book{})
+	if scream != nil {
+		panic(scream)
+	}
 
 	//Create Table
 	ormBooks.DropTable()

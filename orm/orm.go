@@ -38,6 +38,8 @@ type Handler struct {
 	db             *sql.DB
 	sqlCreateTable string
 	sqlDropTable   string
+	sqlInsert      string
+	mapInsert      []saveField
 }
 
 //Finder represents the result of a find operation
@@ -53,10 +55,19 @@ type Deleter struct {
 }
 
 //NewHandler returns a Handler object to manipulate a given table
-func (orm Orm) NewHandler(table interface{}) Handler {
+func (orm Orm) NewHandler(table interface{}) (Handler, error) {
 	typeOfTable := reflect.TypeOf(table)
 	tableName := typeOfTable.Name()
-	return Handler{db: orm.db, table: table, tableName: tableName}
+
+	handler := Handler{db: orm.db, table: table, tableName: tableName}
+
+	//insert
+	err := handler.assembleSQLInsertStatement()
+	if err != nil {
+		return Handler{}, err
+	}
+
+	return handler, err
 }
 
 //CreateTable is just a wrapper for the internal method createTable
