@@ -20,24 +20,35 @@ func main() {
 	}
 
 	//create the orm handler for Book objects
-	ormBooks := orm.Handle(Book{})
+	ormBooks := orm.NewHandler(Book{})
 
 	//Create Table
-	ormBooks.CreateTable()
-
-	//Insert/update
-	ormBooks.Save(Book{Name: "The book is on the table", Pages: 198})
-
-	//Select
-	ormBooks.Find().Where("pages > 0")
-	ormBooks.Find().ByID(9)
-	ormBooks.Find().All()
-
-	//Delete
-	ormBooks.Delete().Where("id=9")
-	ormBooks.Delete().ByID(9)
-	ormBooks.Delete().All()
-
-	//Drop Table
 	ormBooks.DropTable()
+	ormBooks.CreateTable()
+	err := ormBooks.Insert(Book{Name: "The book is on the table", Pages: 198})
+	fmt.Printf("err: %v\n", err)
+
+	/*
+		//Insert/update
+		ormBooks.Insert(Book{Name: "The book is on the table", Pages: 198})
+
+		//Update
+		ormBooks.Update().Where("pages > 0")
+		ormBooks.Update().ByID(9)
+		ormBooks.Update().All()
+
+
+		//Select
+		ormBooks.Select().Where("pages > 0")
+		ormBooks.Select().ByID(9)
+		ormBooks.Select().All()
+
+		//Delete
+		ormBooks.Delete().Where("id=9")
+		ormBooks.Delete().ByID(9)
+		ormBooks.Delete().All()
+
+		//Drop Table
+		ormBooks.DropTable()
+	*/
 }
