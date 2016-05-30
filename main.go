@@ -28,8 +28,10 @@ func main() {
 	//Create Table
 	ormBooks.DropTable()
 	ormBooks.CreateTable()
-	err := ormBooks.Insert(Book{Name: "The book is on the table", Pages: 198})
+	book := Book{Name: "The book is on the table", Pages: 198}
+	err := ormBooks.Insert(&book)
 	fmt.Printf("err: %v\n", err)
+	fmt.Printf("book: %v\n", book)
 
 	/*
 		//Insert/update

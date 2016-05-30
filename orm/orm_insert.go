@@ -40,7 +40,7 @@ func (handler *Handler) assembleSQLInsertStatement() error {
 
 	sqlFields = sqlFields[:len(sqlFields)-2]
 	sqlValues = sqlValues[:len(sqlValues)-2]
-	sqlInstruction = sqlInstruction + sqlFields + ") values (" + sqlValues + ");"
+	sqlInstruction = sqlInstruction + sqlFields + ") values (" + sqlValues + ") RETURNING id;"
 
 	handler.sqlInsert = sqlInstruction
 	handler.mapInsert = fieldMap
@@ -80,26 +80,31 @@ func (handler Handler) assembleSQLUpdateStatement(object interface{}) (string, [
 	return sqlInstruction, fieldMap, nil
 }
 
-func (handler Handler) insert(object interface{}) error {
-	typeOfTable := reflect.TypeOf(object)
-	valueOfTable := reflect.ValueOf(object)
-	tableName := typeOfTable.Name()
-
+func (handler Handler) insert(objectPtr interface{}) error {
+	object := reflect.ValueOf(objectPtr).Elem()
+	tableName := reflect.TypeOf(objectPtr).Elem().Name()
 	if tableName != handler.tableName {
 		return fmt.Errorf("Object table name (%v) is diferent from handler table name (%v)", tableName, handler.tableName)
 	}
 
+	//build the arguments array
 	var args []interface{}
 	for _, field := range handler.mapInsert {
 		if field.fieldType == "int" {
-			args = append(args, int(valueOfTable.FieldByName(field.name).Int()))
+			args = append(args, int(object.FieldByName(field.name).Int()))
 		}
 		if field.fieldType == "string" {
-			args = append(args, string(valueOfTable.FieldByName(field.name).String()))
+			args = append(args, string(object.FieldByName(field.name).String()))
 		}
 	}
-	fmt.Printf("%v\n", handler.sqlInsert)
-	_, err := handler.db.Exec(handler.sqlInsert, args...)
 
-	return err
+	//run INSERT and grab the last insert id
+	var id int
+	err := handler.db.QueryRow(handler.sqlInsert, args...).Scan(&id)
+	if err != nil {
+		return err
+	}
+	object.FieldByName("ID").SetInt(int64(id))
+
+	return nil
 }
