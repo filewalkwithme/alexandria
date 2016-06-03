@@ -14,7 +14,7 @@ type saveField struct {
 // assembleSQLInsertStatement traverse the the object
 // returns a SQL insert instruction and a string array containing the exact
 // parameters order
-func (handler *Handler) assembleSQLInsertStatement() error {
+func (handler *Handler) assembleSQLInsertStatement() {
 	typeOfTable := reflect.TypeOf(handler.table)
 	tableName := typeOfTable.Name()
 
@@ -44,40 +44,6 @@ func (handler *Handler) assembleSQLInsertStatement() error {
 
 	handler.sqlInsert = sqlInstruction
 	handler.mapInsert = fieldMap
-
-	return nil
-}
-
-// assembleSQLInsertStatement traverse the the object
-// returns a SQL insert instruction and a string array containing the exact
-// parameters order
-func (handler Handler) assembleSQLUpdateStatement(object interface{}) (string, []saveField, error) {
-	typeOfTable := reflect.TypeOf(object)
-	tableName := typeOfTable.Name()
-	if tableName != handler.tableName {
-		return "", nil, fmt.Errorf("Object table name (%v) is diferent from handler table name (%v)", tableName, handler.tableName)
-	}
-
-	j := 1
-	sqlInstruction := "update " + tableName + " set "
-	var fieldMap []saveField
-	for i := 0; i < typeOfTable.NumField(); i++ {
-		fieldName := typeOfTable.Field(i).Name
-
-		if fieldName == "ID" {
-			continue
-		}
-
-		fieldMap = append(fieldMap, saveField{name: typeOfTable.Field(i).Name, fieldType: typeOfTable.Field(i).Type.Name()})
-		sqlInstruction = sqlInstruction + fieldName + " = $" + strconv.Itoa(j) + ", "
-		j = j + 1
-	}
-	fieldMap = append(fieldMap, saveField{name: "ID", fieldType: "int"})
-
-	sqlInstruction = sqlInstruction[:len(sqlInstruction)-2]
-	sqlInstruction = sqlInstruction + " where id = ?;"
-
-	return sqlInstruction, fieldMap, nil
 }
 
 func (handler Handler) insert(objectPtr interface{}) error {

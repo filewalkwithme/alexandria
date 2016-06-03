@@ -2,7 +2,7 @@ package orm
 
 import (
 	"database/sql"
-	//"fmt"
+	//	"fmt"
 	"reflect"
 
 	//needed to access postgres
@@ -38,8 +38,12 @@ type Handler struct {
 	db             *sql.DB
 	sqlCreateTable string
 	sqlDropTable   string
-	sqlInsert      string
-	mapInsert      []saveField
+
+	sqlInsert string
+	mapInsert []saveField
+
+	sqlUpdate string
+	mapUpdate []saveField
 }
 
 //Finder represents the result of a find operation
@@ -61,13 +65,13 @@ func (orm Orm) NewHandler(table interface{}) (Handler, error) {
 
 	handler := Handler{db: orm.db, table: table, tableName: tableName}
 
-	//insert
-	err := handler.assembleSQLInsertStatement()
-	if err != nil {
-		return Handler{}, err
-	}
+	//build sql insert
+	handler.assembleSQLInsertStatement()
 
-	return handler, err
+	//build sql update
+	handler.assembleSQLUpdateStatement()
+
+	return handler, nil
 }
 
 //CreateTable is just a wrapper for the internal method createTable
@@ -83,6 +87,12 @@ func (handler Handler) DropTable() error {
 //Insert is just a wrapper for the internal method insert
 func (handler Handler) Insert(object interface{}) error {
 	err := handler.insert(object)
+	return err
+}
+
+//Update is just a wrapper for the internal method update
+func (handler Handler) Update(object interface{}) error {
+	err := handler.update(object)
 	return err
 }
 
