@@ -39,11 +39,11 @@ type Handler struct {
 	sqlCreateTable string
 	sqlDropTable   string
 
-	sqlInsert string
-	mapInsert []saveField
+	insertSQL string
+	insertMap []saveField
 
-	sqlUpdate string
-	mapUpdate []saveField
+	updateSQL string
+	updateMap []saveField
 }
 
 //Finder represents the result of a find operation
@@ -66,10 +66,10 @@ func (orm Orm) NewHandler(table interface{}) (Handler, error) {
 	handler := Handler{db: orm.db, table: table, tableName: tableName}
 
 	//build sql insert
-	handler.assembleSQLInsertStatement()
+	handler.assembleSQLInsert()
 
 	//build sql update
-	handler.assembleSQLUpdateStatement()
+	handler.assembleSQLUpdate()
 
 	return handler, nil
 }

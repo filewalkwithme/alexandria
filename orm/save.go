@@ -11,10 +11,78 @@ type saveField struct {
 	fieldType string
 }
 
-// assembleSQLInsertStatement traverse the the object
-// returns a SQL insert instruction and a string array containing the exact
-// parameters order
-func (handler *Handler) assembleSQLInsertStatement() {
+// save takes a pointer to an object and performs an INSERT if the ID is zero.
+// If the ID is greather than zero, then an UPDATE will be performed instead.
+// Otherwise, if the ID is negative, an error will be returned
+func (handler Handler) save(objectPtr interface{}) error {
+	object := reflect.ValueOf(objectPtr).Elem()
+	tableName := reflect.TypeOf(objectPtr).Elem().Name()
+	if tableName != handler.tableName {
+		return fmt.Errorf("Object table name (%v) is diferent from handler table name (%v)", tableName, handler.tableName)
+	}
+
+	id := object.FieldByName("ID").Int()
+
+	if id == 0 {
+		//insert
+		return handler.insert(object)
+	} else if id > 0 {
+		//update
+		return handler.update(object)
+	} else {
+		//error
+		return fmt.Errorf("Negative ID not allowed: %v", object)
+	}
+}
+
+// insert takes an object, grab its fields and performs an INSERT operation
+func (handler Handler) insert(object reflect.Value) error {
+	values := handler.assembleValuesArray(handler.insertMap, object)
+	var id int
+
+	//run INSERT and grab the last insert id
+	err := handler.db.QueryRow(handler.insertSQL, values...).Scan(&id)
+	if err != nil {
+		return err
+	}
+	object.FieldByName("ID").SetInt(int64(id))
+
+	return nil
+}
+
+// insert takes an object, grab its fields and performs an UPDATE operation
+func (handler Handler) update(object reflect.Value) error {
+	values := handler.assembleValuesArray(handler.updateMap, object)
+
+	//run Update
+	_, err := handler.db.Exec(handler.updateSQL, values...)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// assembleArguments takes an object and return an array of its values populated
+// in the exact order required by the given arguments map. The resulting array
+// of values is intended to be consumed by insert() or update()
+func (handler Handler) assembleValuesArray(argurmentsMap []saveField, object reflect.Value) []interface{} {
+	//build the values array
+	var values []interface{}
+	for _, argument := range argurmentsMap {
+		if argument.fieldType == "int" {
+			values = append(values, int(object.FieldByName(argument.name).Int()))
+		}
+		if argument.fieldType == "string" {
+			values = append(values, string(object.FieldByName(argument.name).String()))
+		}
+	}
+	return values
+}
+
+// assembleSQLInsert creates a SQL Insert string in the current handler.
+// This string will be used by the save() method
+func (handler *Handler) assembleSQLInsert() {
 	typeOfTable := reflect.TypeOf(handler.table)
 	tableName := typeOfTable.Name()
 
@@ -42,14 +110,13 @@ func (handler *Handler) assembleSQLInsertStatement() {
 	sqlValues = sqlValues[:len(sqlValues)-2]
 	sqlInstruction = sqlInstruction + sqlFields + ") values (" + sqlValues + ") RETURNING id;"
 
-	handler.sqlInsert = sqlInstruction
-	handler.mapInsert = fieldMap
+	handler.insertSQL = sqlInstruction
+	handler.insertMap = fieldMap
 }
 
-// assembleSQLInsertStatement traverse the the object
-// returns a SQL insert instruction and a string array containing the exact
-// parameters order
-func (handler *Handler) assembleSQLUpdateStatement() {
+// assembleSQLUpdate creates a SQL Update string in the current handler.
+// This string will be used by the save() method
+func (handler *Handler) assembleSQLUpdate() {
 	typeOfTable := reflect.TypeOf(handler.table)
 	tableName := typeOfTable.Name()
 
@@ -72,67 +139,6 @@ func (handler *Handler) assembleSQLUpdateStatement() {
 	sqlInstruction = sqlInstruction[:len(sqlInstruction)-2]
 	sqlInstruction = sqlInstruction + " where id = $" + strconv.Itoa(j) + ";"
 
-	handler.sqlUpdate = sqlInstruction
-	handler.mapUpdate = fieldMap
-}
-
-func (handler Handler) assembleArguments(argsMap []saveField, object reflect.Value) []interface{} {
-	//build the arguments array
-	var args []interface{}
-	for _, field := range argsMap {
-		if field.fieldType == "int" {
-			args = append(args, int(object.FieldByName(field.name).Int()))
-		}
-		if field.fieldType == "string" {
-			args = append(args, string(object.FieldByName(field.name).String()))
-		}
-	}
-	return args
-}
-
-func (handler Handler) insert(object reflect.Value) error {
-	args := handler.assembleArguments(handler.mapInsert, object)
-
-	//run INSERT and grab the last insert id
-	var id int
-	err := handler.db.QueryRow(handler.sqlInsert, args...).Scan(&id)
-	if err != nil {
-		return err
-	}
-	object.FieldByName("ID").SetInt(int64(id))
-
-	return nil
-}
-
-func (handler Handler) update(object reflect.Value) error {
-	args := handler.assembleArguments(handler.mapUpdate, object)
-
-	//run Update
-	_, err := handler.db.Exec(handler.sqlUpdate, args...)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (handler Handler) save(objectPtr interface{}) error {
-	object := reflect.ValueOf(objectPtr).Elem()
-	tableName := reflect.TypeOf(objectPtr).Elem().Name()
-	if tableName != handler.tableName {
-		return fmt.Errorf("Object table name (%v) is diferent from handler table name (%v)", tableName, handler.tableName)
-	}
-
-	id := object.FieldByName("ID").Int()
-
-	if id == 0 {
-		//insert
-		return handler.insert(object)
-	} else if id > 0 {
-		//update
-		return handler.update(object)
-	} else {
-		//error
-		return fmt.Errorf("Negative ID not allowed: %v", object)
-	}
+	handler.updateSQL = sqlInstruction
+	handler.updateMap = fieldMap
 }
