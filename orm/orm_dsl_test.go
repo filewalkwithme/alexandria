@@ -45,9 +45,13 @@ func TestCreateTable(t *testing.T) {
 		panic(scream)
 	}
 
-	ormTest := orm.NewHandler(DSLTest{})
+	ormTest, err := orm.NewHandler(DSLTest{})
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+
 	ormTest.DropTable()
-	err := ormTest.CreateTable()
+	err = ormTest.CreateTable()
 	if err != nil {
 		t.Fatalf("err: %v", err)
 	}
@@ -59,7 +63,11 @@ func TestCreateTable(t *testing.T) {
 		t.Fatalf("%v", err.Error())
 	}
 
-	ormTest = orm.NewHandler(DSLTestWithoutID{})
+	ormTest, err = orm.NewHandler(DSLTestWithoutID{})
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+
 	ormTest.sqlCreateTable = ""
 	ormTest.DropTable()
 	err = ormTest.CreateTable()
@@ -86,9 +94,13 @@ func TestDropTable(t *testing.T) {
 		panic(scream)
 	}
 
-	ormTest := orm.NewHandler(DSLTest{})
+	ormTest, err := orm.NewHandler(DSLTest{})
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+
 	ormTest.CreateTable()
-	err := ormTest.DropTable()
+	err = ormTest.DropTable()
 	if err != nil {
 		t.Fatalf("err: %v", err)
 	}
