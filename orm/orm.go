@@ -2,7 +2,7 @@ package orm
 
 import (
 	"database/sql"
-	//	"fmt"
+	//"fmt"
 	"reflect"
 
 	//needed to access postgres
@@ -84,15 +84,9 @@ func (handler Handler) DropTable() error {
 	return handler.dropTable()
 }
 
-//Insert is just a wrapper for the internal method insert
-func (handler Handler) Insert(object interface{}) error {
-	err := handler.insert(object)
-	return err
-}
-
-//Update is just a wrapper for the internal method update
-func (handler Handler) Update(object interface{}) error {
-	err := handler.update(object)
+//Save ....
+func (handler Handler) Save(object interface{}) error {
+	err := handler.save(object)
 	return err
 }
 
