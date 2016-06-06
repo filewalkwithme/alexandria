@@ -2,7 +2,7 @@ package orm
 
 import (
 	"database/sql"
-	//"fmt"
+	"fmt"
 	"reflect"
 
 	//needed to access postgres
@@ -44,12 +44,10 @@ type Handler struct {
 
 	updateSQL string
 	updateMap []saveField
-}
 
-//Finder represents the result of a find operation
-type Finder struct {
-	table interface{}
-	db    *sql.DB
+	selectSQL           string
+	selectFieldNamesMap []string
+	selectScanMap       []interface{}
 }
 
 //Deleter represents a delete operation
@@ -71,6 +69,10 @@ func (orm Orm) NewHandler(table interface{}) (Handler, error) {
 	//build sql update
 	handler.assembleSQLUpdate()
 
+	//build sql update
+	handler.assembleSQLSelect()
+	fmt.Printf("%v\n", handler.selectSQL)
+
 	return handler, nil
 }
 
@@ -90,24 +92,29 @@ func (handler Handler) Save(object interface{}) error {
 	return err
 }
 
-//Find returns a Finder object
-func (handler Handler) Find() Finder {
-	return Finder{db: handler.db, table: handler.table}
+//Selecter represents the result of a find operation
+type Selecter struct {
+	handler Handler
+}
+
+//Select returns a Finder object
+func (handler Handler) Select() Selecter {
+	return Selecter{handler: handler}
 }
 
 //Where returns an array containing all results of a SELECT
-func (f Finder) Where(where string) []interface{} {
-	return f.findWhere(f.table, where)
+func (s Selecter) Where(where string, arguments ...interface{}) ([]interface{}, error) {
+	return s.selectWhere(where, arguments...)
 }
 
 //ByID returns an array containing all results of a SELECT
-func (f Finder) ByID(id int) interface{} {
-	return f.findByID(f.table, id)
+func (s Selecter) ByID(id int) (interface{}, error) {
+	return s.selectByID(id)
 }
 
 //All returns an array containing all results of a SELECT
-func (f Finder) All() []interface{} {
-	return f.findAll(f.table)
+func (s Selecter) All() ([]interface{}, error) {
+	return s.selectAll()
 }
 
 //Delete returns a Finder object
