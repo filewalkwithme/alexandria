@@ -14,7 +14,7 @@ func (handler *Handler) assembleSQLDelete() {
 }
 
 func (deleter Deleter) deleteByID(id int) (int, error) {
-	sqlInstruction := deleter.handler.deleteSQL + " where id = $1 returning *"
+	sqlInstruction := deleter.handler.deleteSQL + " where id = $1"
 
 	result, err := deleter.handler.db.Exec(sqlInstruction, id)
 	if err != nil {
@@ -26,7 +26,7 @@ func (deleter Deleter) deleteByID(id int) (int, error) {
 }
 
 func (deleter Deleter) deleteWhere(where string, arguments ...interface{}) (int, error) {
-	sqlInstruction := deleter.handler.deleteSQL + " where " + where + " returning *"
+	sqlInstruction := deleter.handler.deleteSQL + " where " + where
 
 	result, err := deleter.handler.db.Exec(sqlInstruction, arguments...)
 	if err != nil {
@@ -38,7 +38,7 @@ func (deleter Deleter) deleteWhere(where string, arguments ...interface{}) (int,
 }
 
 func (deleter Deleter) deleteAll() (int, error) {
-	sqlInstruction := deleter.handler.deleteSQL + " where 1=1 RETURNING ID AS OPA"
+	sqlInstruction := deleter.handler.deleteSQL
 
 	result, err := deleter.handler.db.Exec(sqlInstruction)
 	if err != nil {
