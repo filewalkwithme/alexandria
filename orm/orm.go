@@ -2,7 +2,6 @@ package orm
 
 import (
 	"database/sql"
-	"fmt"
 	"reflect"
 
 	//needed to access postgres
@@ -48,12 +47,8 @@ type Handler struct {
 	selectSQL           string
 	selectFieldNamesMap []string
 	selectScanMap       []interface{}
-}
 
-//Deleter represents a delete operation
-type Deleter struct {
-	table interface{}
-	db    *sql.DB
+	deleteSQL string
 }
 
 //NewHandler returns a Handler object to manipulate a given table
@@ -71,7 +66,9 @@ func (orm Orm) NewHandler(table interface{}) (Handler, error) {
 
 	//build sql update
 	handler.assembleSQLSelect()
-	fmt.Printf("%v\n", handler.selectSQL)
+
+	//build sql update
+	handler.assembleSQLDelete()
 
 	return handler, nil
 }
@@ -117,24 +114,29 @@ func (s Selecter) All() ([]interface{}, error) {
 	return s.selectAll()
 }
 
+//Deleter represents a delete operation
+type Deleter struct {
+	handler Handler
+}
+
 //Delete returns a Finder object
 func (handler Handler) Delete() Deleter {
-	return Deleter{db: handler.db, table: handler.table}
+	return Deleter{handler: handler}
 }
 
 //Where perform a DELETE operation
-func (d Deleter) Where(where string) int {
-	return d.deleteWhere(d.table, where)
+func (d Deleter) Where(where string, arguments ...interface{}) (int, error) {
+	return d.deleteWhere(where, arguments...)
 }
 
 //ByID perform a DELETE operation
-func (d Deleter) ByID(id int) int {
-	return d.deleteByID(d.table, id)
+func (d Deleter) ByID(id int) (int, error) {
+	return d.deleteByID(id)
 }
 
 //All perform a DELETE operation
-func (d Deleter) All() int {
-	return d.deleteAll(d.table)
+func (d Deleter) All() (int, error) {
+	return d.deleteAll()
 }
 
 //----------------------------
