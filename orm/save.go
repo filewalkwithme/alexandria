@@ -137,7 +137,7 @@ func (handler *Handler) assembleSQLUpdate() {
 	fieldMap = append(fieldMap, saveField{name: "ID", fieldType: "int"})
 
 	sqlInstruction = sqlInstruction[:len(sqlInstruction)-2]
-	sqlInstruction = sqlInstruction + " where id = $" + strconv.Itoa(j) + ";"
+	sqlInstruction = sqlInstruction + " where id = $" + strconv.Itoa(j)
 
 	handler.updateSQL = sqlInstruction
 	handler.updateMap = fieldMap
