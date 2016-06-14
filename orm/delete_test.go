@@ -4,6 +4,22 @@ import (
 	"testing"
 )
 
+func TestAssembleSQLDelete(t *testing.T) {
+	orm, scream := ConnectToPostgres()
+	if scream != nil {
+		panic(scream)
+	}
+
+	ormTest, err := orm.NewHandler(DSLTest{})
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+
+	if ormTest.deleteSQL != "delete from DSLTest" {
+		t.Fatalf("want: 'delete from DSLTest', got: '%v'", ormTest.deleteSQL)
+	}
+}
+
 func TestDeleteByID(t *testing.T) {
 	//connect to Postgres
 	orm, scream := ConnectToPostgres()
