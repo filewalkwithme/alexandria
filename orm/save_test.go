@@ -5,8 +5,71 @@ import (
 	"testing"
 )
 
+func TestSave(t *testing.T) {
+	//connect to Postgres
+	orm, scream := ConnectToPostgres()
+	if scream != nil {
+		panic(scream)
+	}
+
+	ormTest, err := orm.NewHandler(DSLTest{})
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+
+	//check if the object is stored in the table and if the ID is populated after insert
+	ormTest.DropTable()
+	ormTest.CreateTable()
+	dslTest := DSLTest{FieldString: "teststring", FieldInt: 123}
+	err = ormTest.Save(&dslTest)
+	if err != nil {
+		t.Fatalf("Err: %v", err)
+	}
+
+	id := dslTest.ID
+	if id != 1 {
+		t.Fatalf("want: 1; got: %v", id)
+	}
+
+	dslTestFind, err := ormTest.Select().ByID(id)
+	if err != nil {
+		t.Fatalf("Err: %v", err)
+	}
+	obj := dslTestFind.(DSLTest)
+
+	if dslTestFind == nil {
+		t.Fatalf("want: a valida object, got nil")
+	}
+
+	obj.FieldInt = 222
+	err = ormTest.Save(&obj)
+	if err != nil {
+		t.Fatalf("Err: %v", err)
+	}
+
+	dslTestFindUptated, err := ormTest.Select().ByID(id)
+	if err != nil {
+		t.Fatalf("Err: %v", err)
+	}
+	obj = dslTestFindUptated.(DSLTest)
+
+	if dslTestFindUptated == nil {
+		t.Fatalf("want: a valida object, got nil")
+	}
+
+	if obj.FieldInt != 222 {
+		t.Fatalf("want: 222, got: %v", obj.FieldInt)
+	}
+
+	dslTestNegativeID := DSLTest{FieldString: "teststring", FieldInt: 123, ID: -1}
+	err = ormTest.Save(&dslTestNegativeID)
+	if err.Error() != "Negative ID not allowed: {-1 teststring 123}" {
+		t.Fatalf("want: `Negative ID not allowed: {-1 teststring 123}`, got `%v`", err)
+	}
+}
+
 func TestAssembleValuesArray(t *testing.T) {
-	
+
 }
 
 func TestAssembleSQLInsertStatement(t *testing.T) {
