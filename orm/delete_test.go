@@ -111,3 +111,63 @@ func TestDeleteWhere(t *testing.T) {
 	}
 	ormTest.deleteSQL = oldDeleteSQL
 }
+
+func TestDeleteAll(t *testing.T) {
+	//connect to Postgres
+	orm, scream := ConnectToPostgres()
+	if scream != nil {
+		panic(scream)
+	}
+
+	ormTest, err := orm.NewHandler(DSLTest{})
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+
+	//check if the object is stored in the table and if the ID is populated after insert
+	ormTest.DropTable()
+	ormTest.CreateTable()
+	dslTest1 := DSLTest{FieldString: "teststring1", FieldInt: 111}
+	err = ormTest.Save(&dslTest1)
+	if err != nil {
+		t.Fatalf("Err: %v", err)
+	}
+
+	dslTest2 := DSLTest{FieldString: "teststring2", FieldInt: 222}
+	err = ormTest.Save(&dslTest2)
+	if err != nil {
+		t.Fatalf("Err: %v", err)
+	}
+
+	dslTest3 := DSLTest{FieldString: "teststring3", FieldInt: 333}
+	err = ormTest.Save(&dslTest3)
+	if err != nil {
+		t.Fatalf("Err: %v", err)
+	}
+
+	dslTestResults, err := ormTest.Select().All()
+	if err != nil {
+		t.Fatalf("Err: %v", err)
+	}
+
+	if len(dslTestResults) != 3 {
+		t.Fatalf("want: 3, got: %v", len(dslTestResults))
+	}
+
+	n, err := ormTest.Delete().All()
+	if err != nil {
+		t.Fatalf("Err: %v", err)
+	}
+
+	if n != 3 {
+		t.Fatalf("want: 3, got: %v", n)
+	}
+
+	oldDeleteSQL := ormTest.deleteSQL
+	ormTest.deleteSQL = "wrong-sql"
+	n, err = ormTest.Delete().All()
+	if err.Error() != "pq: syntax error at or near \"wrong\"" {
+		t.Fatalf("want: `pq: syntax error at or near \"wrong\"`, got: `%v`", err)
+	}
+	ormTest.deleteSQL = oldDeleteSQL
+}
