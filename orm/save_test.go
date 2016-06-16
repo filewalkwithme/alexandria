@@ -1,7 +1,7 @@
 package orm
 
 import (
-	//	"fmt"
+	"reflect"
 	"testing"
 )
 
@@ -68,6 +68,96 @@ func TestSave(t *testing.T) {
 	}
 }
 
+func TestInsertAndUpdate(t *testing.T) {
+	//connect to Postgres
+	orm, scream := ConnectToPostgres()
+	if scream != nil {
+		panic(scream)
+	}
+
+	//create a new handler for DSLTest structure
+	ormTest, err := orm.NewHandler(DSLTest{})
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+
+	//DropTable & CreateTable
+	ormTest.DropTable()
+	ormTest.CreateTable()
+
+	//create a test object
+	dslTest := DSLTest{FieldString: "teststring", FieldInt: 123}
+	object := reflect.ValueOf(&dslTest).Elem()
+
+	//insert on db
+	err = ormTest.insert(object)
+	if err != nil {
+		t.Fatalf("Err: %v", err)
+	}
+
+	if dslTest.ID != 1 {
+		t.Fatalf("\ndslTest.ID got:\t %v\nWant:\t\t\t 1\n", dslTest.ID)
+	}
+
+	//check if the object was persisted
+	dslTestFind, err := ormTest.Select().ByID(1)
+	if err != nil {
+		t.Fatalf("Err: %v", err)
+	}
+	obj := dslTestFind.(DSLTest)
+
+	if dslTestFind == nil {
+		t.Fatalf("want: a valida object, got nil")
+	}
+
+	if obj.FieldInt != 123 {
+		t.Fatalf("want: 123, got: %v", obj.FieldInt)
+	}
+
+	//change FieldInt atribute
+	obj.FieldInt = 222
+
+	//update on db
+	object = reflect.ValueOf(&obj).Elem()
+	err = ormTest.update(object)
+	if err != nil {
+		t.Fatalf("Err: %v", err)
+	}
+
+	//check if the object was correctly updated
+	dslTestFind, err = ormTest.Select().ByID(1)
+	if err != nil {
+		t.Fatalf("Err: %v", err)
+	}
+	obj = dslTestFind.(DSLTest)
+
+	if dslTestFind == nil {
+		t.Fatalf("want: a valida object, got nil")
+	}
+
+	if obj.FieldInt != 222 {
+		t.Fatalf("want: 222, got: %v", obj.FieldInt)
+	}
+
+	//force a error on insert
+	oldInsertSQL := ormTest.insertSQL
+	ormTest.insertSQL = "wrong-sql"
+	err = ormTest.insert(object)
+	if err.Error() != "pq: syntax error at or near \"wrong\"" {
+		t.Fatalf("want: `pq: syntax error at or near \"wrong\"`, got: `%v`", err)
+	}
+	ormTest.insertSQL = oldInsertSQL
+
+	//force a error on insert
+	oldUpdateSQL := ormTest.updateSQL
+	ormTest.updateSQL = "wrong-sql"
+	err = ormTest.update(object)
+	if err.Error() != "pq: syntax error at or near \"wrong\"" {
+		t.Fatalf("want: `pq: syntax error at or near \"wrong\"`, got: `%v`", err)
+	}
+	ormTest.updateSQL = oldUpdateSQL
+}
+
 func TestAssembleValuesArray(t *testing.T) {
 
 }
@@ -125,45 +215,5 @@ func TestAssembleSQLUpdate(t *testing.T) {
 
 	if updateMap[2].name != "ID" || updateMap[2].fieldType != "int" {
 		t.Fatalf("updateMap[2] got: %v, want: {ID int}\n", updateMap[2])
-	}
-}
-
-func TestInsert(t *testing.T) {
-	//connect to Postgres
-	orm, scream := ConnectToPostgres()
-	if scream != nil {
-		panic(scream)
-	}
-
-	ormTest, err := orm.NewHandler(DSLTest{})
-	if err != nil {
-		t.Fatalf("err: %v", err)
-	}
-
-	//check if the object is stored in the table and if the ID is populated after insert
-	ormTest.DropTable()
-	ormTest.CreateTable()
-	dslTest := DSLTest{FieldString: "teststring", FieldInt: 123}
-	err = ormTest.Save(&dslTest)
-	if err != nil {
-		t.Fatalf("Err: %v", err)
-	}
-
-	if dslTest.ID != 1 {
-		t.Fatalf("\ndslTest.ID got:\t %v\nWant:\t\t\t 1\n", dslTest.ID)
-	}
-
-	//force an error by passing an object with a wrong type
-	dslTestWithoutID := DSLTestWithoutID{FieldString: "teststring", FieldInt: 123}
-	err = ormTest.Save(&dslTestWithoutID)
-	if err.Error() != "Object table name (DSLTestWithoutID) is diferent from handler table name (DSLTest)" {
-		t.Fatalf("Error expected: 'Object table name (DSLTestWithoutID) is diferent from handler table name (DSLTest)'\nError got: %v\n", err)
-	}
-
-	//force an error by droping the table before the insert
-	ormTest.DropTable()
-	err = ormTest.Save(&dslTest)
-	if err.Error() != `pq: relation "dsltest" does not exist` {
-		t.Fatalf("Error expected: 'pq: relation \"dsltest\" does not exist'\nError got: %v\n", err)
 	}
 }
