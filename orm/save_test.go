@@ -173,7 +173,52 @@ func TestInsertAndUpdate(t *testing.T) {
 }
 
 func TestAssembleValuesArray(t *testing.T) {
+	//connect to Postgres
+	orm, scream := ConnectToPostgres()
+	if scream != nil {
+		panic(scream)
+	}
+	//create a new handler for DSLTest structure
+	ormTest, err := orm.NewHandler(DSLTest{})
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
 
+	argurmentsMap := []saveField{{name: "FieldString", fieldType: "string"}, {name: "FieldInt", fieldType: "int"}, {name: "ID", fieldType: "int"}}
+	objectPtr := &DSLTest{ID: 1, FieldString: "teststring", FieldInt: 123}
+	object := reflect.ValueOf(objectPtr).Elem()
+
+	res := ormTest.assembleValuesArray(argurmentsMap, object)
+	if len(res) != 3 {
+		t.Fatalf("want: 3, got: %v", len(res))
+	}
+
+	switch v := res[0].(type) {
+	default:
+		t.Fatalf("want: string, got: %v", v)
+	case string:
+		if res[0].(string) != "teststring" {
+			t.Fatalf("want: teststring, got: %v", res[0].(string))
+		}
+	}
+
+	switch v := res[1].(type) {
+	default:
+		t.Fatalf("want: int, got: %v", v)
+	case int:
+		if res[1].(int) != 123 {
+			t.Fatalf("want: teststring, got: %v", res[1].(int))
+		}
+	}
+
+	switch v := res[2].(type) {
+	default:
+		t.Fatalf("want: int, got: %v", v)
+	case int:
+		if res[2].(int) != 1 {
+			t.Fatalf("want: teststring, got: %v", res[2].(int))
+		}
+	}
 }
 
 func TestAssembleSQLInsertStatement(t *testing.T) {
