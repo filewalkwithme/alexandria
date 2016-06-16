@@ -17,20 +17,31 @@ func TestSave(t *testing.T) {
 		t.Fatalf("err: %v", err)
 	}
 
-	//check if the object is stored in the table and if the ID is populated after insert
+	//DropTable & CreateTable
 	ormTest.DropTable()
 	ormTest.CreateTable()
+
+	//Check if we get an error when we try to insert a diferent object for this handler
+	dslTestWithoutID := DSLTestWithoutID{FieldString: "teststring", FieldInt: 123}
+	err = ormTest.Save(&dslTestWithoutID)
+	if err.Error() != "Object table name (DSLTestWithoutID) is diferent from handler table name (DSLTest)" {
+		t.Fatalf("Want: `Object table name (DSLTestWithoutID) is diferent from handler table name (DSLTest)`, got: `%v`", err)
+	}
+
+	//save a new object
 	dslTest := DSLTest{FieldString: "teststring", FieldInt: 123}
 	err = ormTest.Save(&dslTest)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
 	}
 
+	//check if the id is 1
 	id := dslTest.ID
 	if id != 1 {
 		t.Fatalf("want: 1; got: %v", id)
 	}
 
+	//check if the object was persisted
 	dslTestFind, err := ormTest.Select().ByID(id)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
@@ -41,12 +52,14 @@ func TestSave(t *testing.T) {
 		t.Fatalf("want: a valida object, got nil")
 	}
 
+	//update the FieldInt atribute
 	obj.FieldInt = 222
 	err = ormTest.Save(&obj)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
 	}
 
+	//check if the changes were persisted
 	dslTestFindUptated, err := ormTest.Select().ByID(id)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
@@ -61,6 +74,7 @@ func TestSave(t *testing.T) {
 		t.Fatalf("want: 222, got: %v", obj.FieldInt)
 	}
 
+	//check if we got an error when trying to insert an object with negative ID
 	dslTestNegativeID := DSLTest{FieldString: "teststring", FieldInt: 123, ID: -1}
 	err = ormTest.Save(&dslTestNegativeID)
 	if err.Error() != "Negative ID not allowed: {-1 teststring 123}" {
