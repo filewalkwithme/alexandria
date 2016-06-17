@@ -5,36 +5,6 @@ import (
 	"reflect"
 )
 
-func (handler *Handler) assembleSQLSelect() {
-	typeOfTable := reflect.TypeOf(handler.table)
-	tableName := typeOfTable.Name()
-
-	var fieldNames = make([]string, typeOfTable.NumField())
-	var scanFieds = make([]interface{}, typeOfTable.NumField())
-
-	sqlInstruction := "select "
-	for i := 0; i < typeOfTable.NumField(); i++ {
-		fieldName := typeOfTable.Field(i).Name
-		fieldNames[i] = fieldName
-
-		if typeOfTable.Field(i).Type.Name() == "int" {
-			scanFieds[i] = new(int)
-		}
-		if typeOfTable.Field(i).Type.Name() == "string" {
-			scanFieds[i] = new(string)
-		}
-
-		sqlInstruction = sqlInstruction + fieldName + ", "
-	}
-
-	sqlInstruction = sqlInstruction[:len(sqlInstruction)-2]
-	sqlInstruction = sqlInstruction + " from " + tableName
-
-	handler.selectSQL = sqlInstruction
-	handler.selectScanMap = scanFieds
-	handler.selectFieldNamesMap = fieldNames
-}
-
 func (s Selecter) selectByID(id int) (interface{}, error) {
 	sqlInstruction := s.handler.selectSQL + " where id = $1;"
 
@@ -99,4 +69,34 @@ func (s Selecter) buildObject(fields []interface{}) interface{} {
 		}
 	}
 	return vPtr.Elem().Interface()
+}
+
+func (handler *Handler) assembleSQLSelect() {
+	typeOfTable := reflect.TypeOf(handler.table)
+	tableName := typeOfTable.Name()
+
+	var fieldNames = make([]string, typeOfTable.NumField())
+	var scanFieds = make([]interface{}, typeOfTable.NumField())
+
+	sqlInstruction := "select "
+	for i := 0; i < typeOfTable.NumField(); i++ {
+		fieldName := typeOfTable.Field(i).Name
+		fieldNames[i] = fieldName
+
+		if typeOfTable.Field(i).Type.Name() == "int" {
+			scanFieds[i] = new(int)
+		}
+		if typeOfTable.Field(i).Type.Name() == "string" {
+			scanFieds[i] = new(string)
+		}
+
+		sqlInstruction = sqlInstruction + fieldName + ", "
+	}
+
+	sqlInstruction = sqlInstruction[:len(sqlInstruction)-2]
+	sqlInstruction = sqlInstruction + " from " + tableName
+
+	handler.selectSQL = sqlInstruction
+	handler.selectScanMap = scanFieds
+	handler.selectFieldNamesMap = fieldNames
 }
