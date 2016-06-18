@@ -382,3 +382,54 @@ func TestBuildObject(t *testing.T) {
 		t.Fatalf("want: 111 got `%v`", obj.FieldInt)
 	}
 }
+
+func TestAssembleSQLSelect(t *testing.T) {
+	//connect to Postgres
+	orm, scream := ConnectToPostgres()
+	if scream != nil {
+		panic(scream)
+	}
+
+	ormTest, err := orm.NewHandler(DSLTest{})
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+
+	if ormTest.selectSQL != "select ID, FieldString, FieldInt from DSLTest" {
+		t.Fatalf("Want: `select ID, FieldString, FieldInt from DSLTest`, Got: %v", ormTest.selectSQL)
+	}
+
+	if len(ormTest.selectScanMap) != 3 {
+		t.Fatalf("Want: 3, Got: %v", len(ormTest.selectScanMap))
+	}
+
+	obj := (ormTest.Select().buildObject(ormTest.selectScanMap).(DSLTest))
+
+	if obj.ID != 0 {
+		t.Fatalf("want: 0 got: %v", obj.ID)
+	}
+
+	if obj.FieldString != "" {
+		t.Fatalf("want: ``, got: `%v`", obj.FieldString)
+	}
+
+	if obj.FieldInt != 0 {
+		t.Fatalf("want: 0 got: %v", obj.FieldInt)
+	}
+
+	if len(ormTest.selectFieldNamesMap) != 3 {
+		t.Fatalf("Want: 3, Got: %v", len(ormTest.selectFieldNamesMap))
+	}
+
+	if ormTest.selectFieldNamesMap[0] != "ID" {
+		t.Fatalf("want: `ID` got `%v`", ormTest.selectFieldNamesMap[0])
+	}
+
+	if ormTest.selectFieldNamesMap[1] != "FieldString" {
+		t.Fatalf("want: `FieldString` got `%v`", ormTest.selectFieldNamesMap[1])
+	}
+
+	if ormTest.selectFieldNamesMap[2] != "FieldInt" {
+		t.Fatalf("want: `FieldInt` got `%v`", ormTest.selectFieldNamesMap[2])
+	}
+}
