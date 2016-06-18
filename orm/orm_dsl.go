@@ -5,6 +5,38 @@ import (
 	"reflect"
 )
 
+// createTable() must execute the sql CREATE TABLE instruction
+func (handler Handler) createTable() (err error) {
+	sqlInstruction := ""
+
+	if handler.sqlCreateTable != "" {
+		sqlInstruction = handler.sqlCreateTable
+	} else {
+		sqlInstruction, err = handler.assembleSQLCreateTable()
+		if err != nil {
+			return err
+		}
+	}
+
+	_, err = handler.db.Exec(sqlInstruction)
+	return err
+}
+
+// createTable() must execute the sql DROP TABLE instruction
+func (handler Handler) dropTable() error {
+	sqlInstruction := ""
+
+	if handler.sqlDropTable != "" {
+		sqlInstruction = handler.sqlDropTable
+	} else {
+		sqlInstruction = handler.assembleSQLDropTable()
+	}
+
+	_, err := handler.db.Exec(sqlInstruction)
+
+	return err
+}
+
 // createTableSQL() must traverse the table structure, colect its fields and
 // assemble the sql CREATE TABLE instruction
 func (handler Handler) assembleSQLCreateTable() (string, error) {
@@ -44,23 +76,6 @@ func (handler Handler) assembleSQLCreateTable() (string, error) {
 	return sqlInstruction, nil
 }
 
-// createTable() must execute the sql CREATE TABLE instruction
-func (handler Handler) createTable() (err error) {
-	sqlInstruction := ""
-
-	if handler.sqlCreateTable != "" {
-		sqlInstruction = handler.sqlCreateTable
-	} else {
-		sqlInstruction, err = handler.assembleSQLCreateTable()
-		if err != nil {
-			return err
-		}
-	}
-
-	_, err = handler.db.Exec(sqlInstruction)
-	return err
-}
-
 // assembleSQLDropTable() assemble the SQL Drop Table instruction
 func (handler Handler) assembleSQLDropTable() string {
 	tableName := reflect.TypeOf(handler.table).Name()
@@ -69,19 +84,4 @@ func (handler Handler) assembleSQLDropTable() string {
 	handler.sqlDropTable = sqlInstruction
 
 	return sqlInstruction
-}
-
-// createTable() must execute the sql DROP TABLE instruction
-func (handler Handler) dropTable() error {
-	sqlInstruction := ""
-
-	if handler.sqlDropTable != "" {
-		sqlInstruction = handler.sqlDropTable
-	} else {
-		sqlInstruction = handler.assembleSQLDropTable()
-	}
-
-	_, err := handler.db.Exec(sqlInstruction)
-
-	return err
 }
