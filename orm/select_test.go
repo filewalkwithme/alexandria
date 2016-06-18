@@ -251,3 +251,134 @@ func TestSelectWhere(t *testing.T) {
 	}
 	ormTest.selectSQL = oldSelectSQL
 }
+
+func TestBuildArrayOfObjects(t *testing.T) {
+	//connect to Postgres
+	orm, scream := ConnectToPostgres()
+	if scream != nil {
+		panic(scream)
+	}
+
+	ormTest, err := orm.NewHandler(DSLTest{})
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+
+	//DropTable & CreateTable
+	ormTest.DropTable()
+	ormTest.CreateTable()
+
+	//save a new object - 1
+	dslTest1 := DSLTest{FieldString: "teststring1", FieldInt: 111}
+	err = ormTest.Save(&dslTest1)
+	if err != nil {
+		t.Fatalf("Err: %v", err)
+	}
+
+	//save a new object - 2
+	dslTest2 := DSLTest{FieldString: "teststring2", FieldInt: 222}
+	err = ormTest.Save(&dslTest2)
+	if err != nil {
+		t.Fatalf("Err: %v", err)
+	}
+
+	rows, err := ormTest.db.Query(ormTest.selectSQL)
+	if err != nil {
+		t.Fatalf("Err: %v", err)
+	}
+	defer rows.Close()
+
+	objects, err := ormTest.Select().buildArrayOfObjects(rows)
+	if err != nil {
+		t.Fatalf("Err: %v", err)
+	}
+
+	if objects == nil {
+		t.Fatalf("want: a valida object, got nil")
+	}
+
+	if len(objects) != 2 {
+		t.Fatalf("want: 2, got: %v", len(objects))
+	}
+
+	obj1 := objects[0].(DSLTest)
+
+	if obj1.ID != 1 {
+		t.Fatalf("want: 1 got `%v`", obj1.ID)
+	}
+
+	if obj1.FieldString != "teststring1" {
+		t.Fatalf("want: `teststring1`, got `%v`", obj1.FieldString)
+	}
+
+	if obj1.FieldInt != 111 {
+		t.Fatalf("want: 111 got `%v`", obj1.FieldInt)
+	}
+
+	obj2 := objects[1].(DSLTest)
+
+	if obj2.ID != 2 {
+		t.Fatalf("want: 2 got `%v`", obj2.ID)
+	}
+
+	if obj2.FieldString != "teststring2" {
+		t.Fatalf("want: `teststring2`, got `%v`", obj2.FieldString)
+	}
+
+	if obj2.FieldInt != 222 {
+		t.Fatalf("want: 222 got `%v`", obj2.FieldInt)
+	}
+
+	oldSelectScanMap := ormTest.selectScanMap
+	ormTest.selectScanMap = make([]interface{}, 0)
+	rows, err = ormTest.db.Query(ormTest.selectSQL)
+	if err != nil {
+		t.Fatalf("Err: %v", err)
+	}
+	defer rows.Close()
+
+	objects, err = ormTest.Select().buildArrayOfObjects(rows)
+	if err.Error() != "sql: expected 3 destination arguments in Scan, not 0" {
+		t.Fatalf("Expected: `sql: expected 3 destination arguments in Scan, not 0`, got: %v", err)
+	}
+	ormTest.selectScanMap = oldSelectScanMap
+}
+
+func TestBuildObject(t *testing.T) {
+	//connect to Postgres
+	orm, scream := ConnectToPostgres()
+	if scream != nil {
+		panic(scream)
+	}
+
+	ormTest, err := orm.NewHandler(DSLTest{})
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+
+	//DropTable & CreateTable
+	ormTest.DropTable()
+	ormTest.CreateTable()
+
+	scan := make([]interface{}, 3)
+	id := 1
+	fieldString := "teststring1"
+	fieldInt := 111
+	scan[0] = &id
+	scan[1] = &fieldString
+	scan[2] = &fieldInt
+
+	obj := (ormTest.Select().buildObject(scan).(DSLTest))
+
+	if obj.ID != 1 {
+		t.Fatalf("want: 1 got `%v`", obj.ID)
+	}
+
+	if obj.FieldString != "teststring1" {
+		t.Fatalf("want: `teststring1`, got `%v`", obj.FieldString)
+	}
+
+	if obj.FieldInt != 111 {
+		t.Fatalf("want: 111 got `%v`", obj.FieldInt)
+	}
+}
