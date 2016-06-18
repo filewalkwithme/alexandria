@@ -4,15 +4,6 @@ import (
 	"reflect"
 )
 
-func (handler *Handler) assembleSQLDelete() {
-	typeOfTable := reflect.TypeOf(handler.table)
-	tableName := typeOfTable.Name()
-
-	sqlInstruction := "delete from " + tableName
-
-	handler.deleteSQL = sqlInstruction
-}
-
 func (deleter Deleter) deleteByID(id int) (int, error) {
 	sqlInstruction := deleter.handler.deleteSQL + " where id = $1"
 
@@ -47,4 +38,13 @@ func (deleter Deleter) deleteAll() (int, error) {
 	n, err := result.RowsAffected()
 
 	return int(n), err
+}
+
+func (handler *Handler) assembleSQLDelete() {
+	typeOfTable := reflect.TypeOf(handler.table)
+	tableName := typeOfTable.Name()
+
+	sqlInstruction := "delete from " + tableName
+
+	handler.deleteSQL = sqlInstruction
 }
