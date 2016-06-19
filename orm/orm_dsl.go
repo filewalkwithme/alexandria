@@ -52,6 +52,9 @@ func (handler Handler) assembleSQLCreateTable() (string, error) {
 		if typeOfTable.Field(i).Type.Name() == "int" {
 			fieldType = "integer"
 		}
+		if typeOfTable.Field(i).Type.Name() == "float64" {
+			fieldType = "real"
+		}
 		if typeOfTable.Field(i).Type.Name() == "string" {
 			fieldType = "character varying"
 		}

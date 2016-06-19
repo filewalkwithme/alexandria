@@ -10,6 +10,7 @@ type DSLTest struct {
 	FieldString string
 	FieldInt    int
 	FieldBool   bool
+	FieldFloat  float64
 }
 
 //DSLTestWithoutID is used to test SQL creation
@@ -17,6 +18,7 @@ type DSLTestWithoutID struct {
 	FieldString string
 	FieldInt    int
 	FieldBool   bool
+	FieldFloat  float64
 }
 
 func TestCreateTable(t *testing.T) {
@@ -87,7 +89,7 @@ func TestAssembleSQLCreateTable(t *testing.T) {
 	var handler Handler
 	handler.table = DSLTest{}
 
-	expected := `create table DSLTest (ID serial NOT NULL, FieldString character varying, FieldInt integer, FieldBool boolean, constraint DSLTest_pkey primary key (id));`
+	expected := `create table DSLTest (ID serial NOT NULL, FieldString character varying, FieldInt integer, FieldBool boolean, FieldFloat real, constraint DSLTest_pkey primary key (id));`
 	got, _ := handler.assembleSQLCreateTable()
 	if got != expected {
 		t.Fatalf("\nExpected:\t %v\nGot:\t\t %v\n", expected, got)

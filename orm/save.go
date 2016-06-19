@@ -73,6 +73,9 @@ func (handler Handler) assembleValuesArray(argurmentsMap []saveField, object ref
 		if argument.fieldType == "int" {
 			values = append(values, int(object.FieldByName(argument.name).Int()))
 		}
+		if argument.fieldType == "float64" {
+			values = append(values, float64(object.FieldByName(argument.name).Float()))
+		}
 		if argument.fieldType == "string" {
 			values = append(values, string(object.FieldByName(argument.name).String()))
 		}

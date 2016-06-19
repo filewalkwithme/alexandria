@@ -1,6 +1,7 @@
 package orm
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -21,7 +22,7 @@ func TestSelectByID(t *testing.T) {
 	ormTest.CreateTable()
 
 	//save a new object
-	dslTest := DSLTest{FieldString: "teststring", FieldInt: 123, FieldBool: true}
+	dslTest := DSLTest{FieldString: "teststring", FieldInt: 123, FieldBool: true, FieldFloat: 1.23}
 	err = ormTest.Save(&dslTest)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
@@ -54,6 +55,10 @@ func TestSelectByID(t *testing.T) {
 		t.Fatalf("want: true got `%v`", obj.FieldBool)
 	}
 
+	if fmt.Sprintf("%.2f", obj.FieldFloat) != "1.23" {
+		t.Fatalf("want: 1.23 got `%v`", obj.FieldFloat)
+	}
+
 	//force a error on select
 	oldSelectSQL := ormTest.selectSQL
 	ormTest.selectSQL = "wrong-sql"
@@ -81,14 +86,14 @@ func TestSelectAll(t *testing.T) {
 	ormTest.CreateTable()
 
 	//save a new object - 1
-	dslTest1 := DSLTest{FieldString: "teststring1", FieldInt: 111, FieldBool: true}
+	dslTest1 := DSLTest{FieldString: "teststring1", FieldInt: 111, FieldBool: true, FieldFloat: 1.11}
 	err = ormTest.Save(&dslTest1)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
 	}
 
 	//save a new object - 2
-	dslTest2 := DSLTest{FieldString: "teststring2", FieldInt: 222, FieldBool: false}
+	dslTest2 := DSLTest{FieldString: "teststring2", FieldInt: 222, FieldBool: false, FieldFloat: 2.22}
 	err = ormTest.Save(&dslTest2)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
@@ -126,6 +131,10 @@ func TestSelectAll(t *testing.T) {
 		t.Fatalf("want: true got `%v`", obj1.FieldBool)
 	}
 
+	if fmt.Sprintf("%.2f", obj1.FieldFloat) != "1.11" {
+		t.Fatalf("want: 1.11 got `%v`", obj1.FieldFloat)
+	}
+
 	obj2 := dslTestFindAll[1].(DSLTest)
 
 	if obj2.ID != 2 {
@@ -142,6 +151,10 @@ func TestSelectAll(t *testing.T) {
 
 	if obj2.FieldBool != false {
 		t.Fatalf("want: false got `%v`", obj2.FieldBool)
+	}
+
+	if fmt.Sprintf("%.2f", obj2.FieldFloat) != "2.22" {
+		t.Fatalf("want: 2.22 got `%v`", obj2.FieldFloat)
 	}
 
 	//force a error on select
@@ -171,28 +184,28 @@ func TestSelectWhere(t *testing.T) {
 	ormTest.CreateTable()
 
 	//save a new object - 1
-	dslTest1 := DSLTest{FieldString: "teststring1", FieldInt: 111, FieldBool: true}
+	dslTest1 := DSLTest{FieldString: "teststring1", FieldInt: 111, FieldBool: true, FieldFloat: 1.11}
 	err = ormTest.Save(&dslTest1)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
 	}
 
 	//save a new object - 2
-	dslTest2 := DSLTest{FieldString: "teststring2", FieldInt: 222, FieldBool: false}
+	dslTest2 := DSLTest{FieldString: "teststring2", FieldInt: 222, FieldBool: false, FieldFloat: 2.22}
 	err = ormTest.Save(&dslTest2)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
 	}
 
 	//save a new object - 3
-	dslTest3 := DSLTest{FieldString: "teststring3", FieldInt: 333, FieldBool: true}
+	dslTest3 := DSLTest{FieldString: "teststring3", FieldInt: 333, FieldBool: true, FieldFloat: 3.33}
 	err = ormTest.Save(&dslTest3)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
 	}
 
 	//save a new object - 4
-	dslTest4 := DSLTest{FieldString: "teststring4", FieldInt: 444, FieldBool: false}
+	dslTest4 := DSLTest{FieldString: "teststring4", FieldInt: 444, FieldBool: false, FieldFloat: 4.44}
 	err = ormTest.Save(&dslTest4)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
@@ -230,6 +243,10 @@ func TestSelectWhere(t *testing.T) {
 		t.Fatalf("want: false got `%v`", obj1.FieldBool)
 	}
 
+	if fmt.Sprintf("%.2f", obj1.FieldFloat) != "2.22" {
+		t.Fatalf("want: 2.22 got `%v`", obj1.FieldFloat)
+	}
+
 	obj2 := dslTestFindAll[1].(DSLTest)
 
 	if obj2.ID != 3 {
@@ -248,6 +265,10 @@ func TestSelectWhere(t *testing.T) {
 		t.Fatalf("want: true got `%v`", obj2.FieldBool)
 	}
 
+	if fmt.Sprintf("%.2f", obj2.FieldFloat) != "3.33" {
+		t.Fatalf("want: 3.33 got `%v`", obj2.FieldFloat)
+	}
+
 	obj3 := dslTestFindAll[2].(DSLTest)
 
 	if obj3.ID != 4 {
@@ -264,6 +285,10 @@ func TestSelectWhere(t *testing.T) {
 
 	if obj3.FieldBool != false {
 		t.Fatalf("want: false got `%v`", obj3.FieldBool)
+	}
+
+	if fmt.Sprintf("%.2f", obj3.FieldFloat) != "4.44" {
+		t.Fatalf("want: 4.44 got `%v`", obj3.FieldFloat)
 	}
 
 	//force a error on select
@@ -293,14 +318,14 @@ func TestBuildArrayOfObjects(t *testing.T) {
 	ormTest.CreateTable()
 
 	//save a new object - 1
-	dslTest1 := DSLTest{FieldString: "teststring1", FieldInt: 111, FieldBool: false}
+	dslTest1 := DSLTest{FieldString: "teststring1", FieldInt: 111, FieldBool: false, FieldFloat: 1.11}
 	err = ormTest.Save(&dslTest1)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
 	}
 
 	//save a new object - 2
-	dslTest2 := DSLTest{FieldString: "teststring2", FieldInt: 222, FieldBool: true}
+	dslTest2 := DSLTest{FieldString: "teststring2", FieldInt: 222, FieldBool: true, FieldFloat: 2.22}
 	err = ormTest.Save(&dslTest2)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
@@ -343,6 +368,10 @@ func TestBuildArrayOfObjects(t *testing.T) {
 		t.Fatalf("want: false got `%v`", obj1.FieldBool)
 	}
 
+	if fmt.Sprintf("%.2f", obj1.FieldFloat) != "1.11" {
+		t.Fatalf("want: 1.11 got `%v`", obj1.FieldFloat)
+	}
+
 	obj2 := objects[1].(DSLTest)
 
 	if obj2.ID != 2 {
@@ -361,6 +390,10 @@ func TestBuildArrayOfObjects(t *testing.T) {
 		t.Fatalf("want: true got `%v`", obj2.FieldBool)
 	}
 
+	if fmt.Sprintf("%.2f", obj2.FieldFloat) != "2.22" {
+		t.Fatalf("want: 2.22 got `%v`", obj2.FieldFloat)
+	}
+
 	oldSelectScanMap := ormTest.selectScanMap
 	ormTest.selectScanMap = make([]interface{}, 0)
 	rows, err = ormTest.db.Query(ormTest.selectSQL)
@@ -370,8 +403,8 @@ func TestBuildArrayOfObjects(t *testing.T) {
 	defer rows.Close()
 
 	objects, err = ormTest.Select().buildArrayOfObjects(rows)
-	if err.Error() != "sql: expected 4 destination arguments in Scan, not 0" {
-		t.Fatalf("Expected: `sql: expected 4 destination arguments in Scan, not 0`, got: %v", err)
+	if err.Error() != "sql: expected 5 destination arguments in Scan, not 0" {
+		t.Fatalf("Expected: `sql: expected 5 destination arguments in Scan, not 0`, got: %v", err)
 	}
 	ormTest.selectScanMap = oldSelectScanMap
 }
@@ -392,15 +425,17 @@ func TestBuildObject(t *testing.T) {
 	ormTest.DropTable()
 	ormTest.CreateTable()
 
-	scan := make([]interface{}, 4)
+	scan := make([]interface{}, 5)
 	id := 1
 	fieldString := "teststring1"
 	fieldInt := 111
 	fieldBool := true
+	fieldFloat := 1.23
 	scan[0] = &id
 	scan[1] = &fieldString
 	scan[2] = &fieldInt
 	scan[3] = &fieldBool
+	scan[4] = &fieldFloat
 
 	obj := (ormTest.Select().buildObject(scan).(DSLTest))
 
@@ -419,6 +454,10 @@ func TestBuildObject(t *testing.T) {
 	if obj.FieldBool != true {
 		t.Fatalf("want: true got `%v`", obj.FieldBool)
 	}
+
+	if fmt.Sprintf("%.2f", obj.FieldFloat) != "1.23" {
+		t.Fatalf("want: 1.23 got `%v`", obj.FieldFloat)
+	}
 }
 
 func TestAssembleSQLSelect(t *testing.T) {
@@ -433,12 +472,12 @@ func TestAssembleSQLSelect(t *testing.T) {
 		t.Fatalf("err: %v", err)
 	}
 
-	if ormTest.selectSQL != "select ID, FieldString, FieldInt, FieldBool from DSLTest" {
-		t.Fatalf("Want: `select ID, FieldString, FieldInt, FieldBool from DSLTest`, Got: `%v`", ormTest.selectSQL)
+	if ormTest.selectSQL != "select ID, FieldString, FieldInt, FieldBool, FieldFloat from DSLTest" {
+		t.Fatalf("Want: `select ID, FieldString, FieldInt, FieldBool, FieldFloat from DSLTest`, Got: `%v`", ormTest.selectSQL)
 	}
 
-	if len(ormTest.selectScanMap) != 4 {
-		t.Fatalf("Want: 4, Got: %v", len(ormTest.selectScanMap))
+	if len(ormTest.selectScanMap) != 5 {
+		t.Fatalf("Want: 5, Got: %v", len(ormTest.selectScanMap))
 	}
 
 	obj := (ormTest.Select().buildObject(ormTest.selectScanMap).(DSLTest))
@@ -459,8 +498,12 @@ func TestAssembleSQLSelect(t *testing.T) {
 		t.Fatalf("want: false got: %v", obj.FieldBool)
 	}
 
-	if len(ormTest.selectFieldNamesMap) != 4 {
-		t.Fatalf("Want: 4, Got: %v", len(ormTest.selectFieldNamesMap))
+	if fmt.Sprintf("%.2f", obj.FieldFloat) != "0.00" {
+		t.Fatalf("want: 0.00 got `%v`", obj.FieldFloat)
+	}
+
+	if len(ormTest.selectFieldNamesMap) != 5 {
+		t.Fatalf("Want: 5, Got: %v", len(ormTest.selectFieldNamesMap))
 	}
 
 	if ormTest.selectFieldNamesMap[0] != "ID" {
@@ -477,5 +520,9 @@ func TestAssembleSQLSelect(t *testing.T) {
 
 	if ormTest.selectFieldNamesMap[3] != "FieldBool" {
 		t.Fatalf("want: `FieldBool` got `%v`", ormTest.selectFieldNamesMap[3])
+	}
+
+	if ormTest.selectFieldNamesMap[4] != "FieldFloat" {
+		t.Fatalf("want: `FieldFloat` got `%v`", ormTest.selectFieldNamesMap[4])
 	}
 }

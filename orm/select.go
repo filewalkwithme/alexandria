@@ -64,6 +64,9 @@ func (s Selecter) buildObject(fields []interface{}) interface{} {
 		if typeOfTable.Field(i).Type.Name() == "int" {
 			vPtr.Elem().FieldByName(s.handler.selectFieldNamesMap[i]).SetInt(int64(*(fields[i].(*int))))
 		}
+		if typeOfTable.Field(i).Type.Name() == "float64" {
+			vPtr.Elem().FieldByName(s.handler.selectFieldNamesMap[i]).SetFloat(float64(*(fields[i].(*float64))))
+		}
 		if typeOfTable.Field(i).Type.Name() == "string" {
 			vPtr.Elem().FieldByName(s.handler.selectFieldNamesMap[i]).SetString(*(fields[i].(*string)))
 		}
@@ -88,6 +91,9 @@ func (handler *Handler) assembleSQLSelect() {
 
 		if typeOfTable.Field(i).Type.Name() == "int" {
 			scanFieds[i] = new(int)
+		}
+		if typeOfTable.Field(i).Type.Name() == "float64" {
+			scanFieds[i] = new(float64)
 		}
 		if typeOfTable.Field(i).Type.Name() == "string" {
 			scanFieds[i] = new(string)
