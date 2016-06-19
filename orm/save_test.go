@@ -7,7 +7,7 @@ import (
 
 func TestSave(t *testing.T) {
 	//connect to Postgres
-	orm, scream := ConnectToPostgres()
+	orm, scream := ConnectToPostgres(dbURL)
 	if scream != nil {
 		panic(scream)
 	}
@@ -84,7 +84,7 @@ func TestSave(t *testing.T) {
 
 func TestInsertAndUpdate(t *testing.T) {
 	//connect to Postgres
-	orm, scream := ConnectToPostgres()
+	orm, scream := ConnectToPostgres(dbURL)
 	if scream != nil {
 		panic(scream)
 	}
@@ -174,7 +174,7 @@ func TestInsertAndUpdate(t *testing.T) {
 
 func TestAssembleValuesArray(t *testing.T) {
 	//connect to Postgres
-	orm, scream := ConnectToPostgres()
+	orm, scream := ConnectToPostgres(dbURL)
 	if scream != nil {
 		panic(scream)
 	}

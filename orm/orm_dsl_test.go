@@ -19,7 +19,7 @@ type DSLTestWithoutID struct {
 
 func TestCreateTable(t *testing.T) {
 	//connect to Postgres
-	orm, scream := ConnectToPostgres()
+	orm, scream := ConnectToPostgres(dbURL)
 	if scream != nil {
 		panic(scream)
 	}
@@ -57,7 +57,7 @@ func TestCreateTable(t *testing.T) {
 
 func TestDropTable(t *testing.T) {
 	//connect to Postgres
-	orm, scream := ConnectToPostgres()
+	orm, scream := ConnectToPostgres(dbURL)
 	if scream != nil {
 		panic(scream)
 	}

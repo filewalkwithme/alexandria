@@ -6,7 +6,7 @@ import (
 
 func TestDeleteByID(t *testing.T) {
 	//connect to Postgres
-	orm, scream := ConnectToPostgres()
+	orm, scream := ConnectToPostgres(dbURL)
 	if scream != nil {
 		panic(scream)
 	}
@@ -60,7 +60,7 @@ func TestDeleteByID(t *testing.T) {
 
 func TestDeleteWhere(t *testing.T) {
 	//connect to Postgres
-	orm, scream := ConnectToPostgres()
+	orm, scream := ConnectToPostgres(dbURL)
 	if scream != nil {
 		panic(scream)
 	}
@@ -114,7 +114,7 @@ func TestDeleteWhere(t *testing.T) {
 
 func TestDeleteAll(t *testing.T) {
 	//connect to Postgres
-	orm, scream := ConnectToPostgres()
+	orm, scream := ConnectToPostgres(dbURL)
 	if scream != nil {
 		panic(scream)
 	}
@@ -173,7 +173,7 @@ func TestDeleteAll(t *testing.T) {
 }
 
 func TestAssembleSQLDelete(t *testing.T) {
-	orm, scream := ConnectToPostgres()
+	orm, scream := ConnectToPostgres(dbURL)
 	if scream != nil {
 		panic(scream)
 	}

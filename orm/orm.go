@@ -3,7 +3,6 @@ package orm
 import (
 	"database/sql"
 	"reflect"
-
 	//needed to access postgres
 	_ "github.com/lib/pq"
 )
@@ -13,9 +12,11 @@ type Orm struct {
 	db *sql.DB
 }
 
+var dbDriver = "postgres"
+
 //ConnectToPostgres open a connection to Posgres
-func ConnectToPostgres() (Orm, error) {
-	tmpDB, err := sql.Open("postgres", "user=docker password=docker dbname=docker sslmode=disable")
+func ConnectToPostgres(dbURL string) (Orm, error) {
+	tmpDB, err := sql.Open(dbDriver, dbURL)
 	if err != nil {
 		return Orm{}, err
 	}

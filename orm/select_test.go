@@ -6,7 +6,7 @@ import (
 
 func TestSelectByID(t *testing.T) {
 	//connect to Postgres
-	orm, scream := ConnectToPostgres()
+	orm, scream := ConnectToPostgres(dbURL)
 	if scream != nil {
 		panic(scream)
 	}
@@ -62,7 +62,7 @@ func TestSelectByID(t *testing.T) {
 
 func TestSelectAll(t *testing.T) {
 	//connect to Postgres
-	orm, scream := ConnectToPostgres()
+	orm, scream := ConnectToPostgres(dbURL)
 	if scream != nil {
 		panic(scream)
 	}
@@ -144,7 +144,7 @@ func TestSelectAll(t *testing.T) {
 
 func TestSelectWhere(t *testing.T) {
 	//connect to Postgres
-	orm, scream := ConnectToPostgres()
+	orm, scream := ConnectToPostgres(dbURL)
 	if scream != nil {
 		panic(scream)
 	}
@@ -254,7 +254,7 @@ func TestSelectWhere(t *testing.T) {
 
 func TestBuildArrayOfObjects(t *testing.T) {
 	//connect to Postgres
-	orm, scream := ConnectToPostgres()
+	orm, scream := ConnectToPostgres(dbURL)
 	if scream != nil {
 		panic(scream)
 	}
@@ -346,7 +346,7 @@ func TestBuildArrayOfObjects(t *testing.T) {
 
 func TestBuildObject(t *testing.T) {
 	//connect to Postgres
-	orm, scream := ConnectToPostgres()
+	orm, scream := ConnectToPostgres(dbURL)
 	if scream != nil {
 		panic(scream)
 	}
@@ -385,7 +385,7 @@ func TestBuildObject(t *testing.T) {
 
 func TestAssembleSQLSelect(t *testing.T) {
 	//connect to Postgres
-	orm, scream := ConnectToPostgres()
+	orm, scream := ConnectToPostgres(dbURL)
 	if scream != nil {
 		panic(scream)
 	}
