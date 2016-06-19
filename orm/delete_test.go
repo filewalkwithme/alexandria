@@ -19,7 +19,7 @@ func TestDeleteByID(t *testing.T) {
 	//check if the object is stored in the table and if the ID is populated after insert
 	ormTest.DropTable()
 	ormTest.CreateTable()
-	dslTest := DSLTest{FieldString: "teststring", FieldInt: 123}
+	dslTest := DSLTest{FieldString: "teststring", FieldInt: 123, FieldBool: false}
 	err = ormTest.Save(&dslTest)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
@@ -73,13 +73,13 @@ func TestDeleteWhere(t *testing.T) {
 	//check if the object is stored in the table and if the ID is populated after insert
 	ormTest.DropTable()
 	ormTest.CreateTable()
-	dslTest1 := DSLTest{FieldString: "teststring1", FieldInt: 111}
+	dslTest1 := DSLTest{FieldString: "teststring1", FieldInt: 111, FieldBool: true}
 	err = ormTest.Save(&dslTest1)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
 	}
 
-	dslTest2 := DSLTest{FieldString: "teststring2", FieldInt: 222}
+	dslTest2 := DSLTest{FieldString: "teststring2", FieldInt: 222, FieldBool: false}
 	err = ormTest.Save(&dslTest2)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
@@ -127,19 +127,19 @@ func TestDeleteAll(t *testing.T) {
 	//check if the object is stored in the table and if the ID is populated after insert
 	ormTest.DropTable()
 	ormTest.CreateTable()
-	dslTest1 := DSLTest{FieldString: "teststring1", FieldInt: 111}
+	dslTest1 := DSLTest{FieldString: "teststring1", FieldInt: 111, FieldBool: true}
 	err = ormTest.Save(&dslTest1)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
 	}
 
-	dslTest2 := DSLTest{FieldString: "teststring2", FieldInt: 222}
+	dslTest2 := DSLTest{FieldString: "teststring2", FieldInt: 222, FieldBool: false}
 	err = ormTest.Save(&dslTest2)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
 	}
 
-	dslTest3 := DSLTest{FieldString: "teststring3", FieldInt: 333}
+	dslTest3 := DSLTest{FieldString: "teststring3", FieldInt: 333, FieldBool: true}
 	err = ormTest.Save(&dslTest3)
 	if err != nil {
 		t.Fatalf("Err: %v", err)

@@ -55,6 +55,9 @@ func (handler Handler) assembleSQLCreateTable() (string, error) {
 		if typeOfTable.Field(i).Type.Name() == "string" {
 			fieldType = "character varying"
 		}
+		if typeOfTable.Field(i).Type.Name() == "bool" {
+			fieldType = "boolean"
+		}
 
 		if fieldName == "ID" {
 			idExists = true
@@ -69,7 +72,7 @@ func (handler Handler) assembleSQLCreateTable() (string, error) {
 	}
 
 	primaryKey := "constraint " + tableName + "_pkey primary key (id)"
-	sqlInstruction := "create table " + tableName + " (" + fieldsList + " " + primaryKey + ");"
+	sqlInstruction := "create table " + tableName + " (" + fieldsList + primaryKey + ");"
 
 	handler.sqlCreateTable = sqlInstruction
 

@@ -67,6 +67,9 @@ func (s Selecter) buildObject(fields []interface{}) interface{} {
 		if typeOfTable.Field(i).Type.Name() == "string" {
 			vPtr.Elem().FieldByName(s.handler.selectFieldNamesMap[i]).SetString(*(fields[i].(*string)))
 		}
+		if typeOfTable.Field(i).Type.Name() == "bool" {
+			vPtr.Elem().FieldByName(s.handler.selectFieldNamesMap[i]).SetBool(*(fields[i].(*bool)))
+		}
 	}
 	return vPtr.Elem().Interface()
 }
@@ -88,6 +91,9 @@ func (handler *Handler) assembleSQLSelect() {
 		}
 		if typeOfTable.Field(i).Type.Name() == "string" {
 			scanFieds[i] = new(string)
+		}
+		if typeOfTable.Field(i).Type.Name() == "bool" {
+			scanFieds[i] = new(bool)
 		}
 
 		sqlInstruction = sqlInstruction + fieldName + ", "

@@ -76,6 +76,9 @@ func (handler Handler) assembleValuesArray(argurmentsMap []saveField, object ref
 		if argument.fieldType == "string" {
 			values = append(values, string(object.FieldByName(argument.name).String()))
 		}
+		if argument.fieldType == "bool" {
+			values = append(values, bool(object.FieldByName(argument.name).Bool()))
+		}
 	}
 	return values
 }
