@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestSave(t *testing.T) {
@@ -23,14 +24,14 @@ func TestSave(t *testing.T) {
 	ormTest.CreateTable()
 
 	//Check if we get an error when we try to insert a diferent object for this handler
-	dslTestWithoutID := DSLTestWithoutID{FieldString: "teststring", FieldInt: 123, FieldBool: false}
+	dslTestWithoutID := DSLTestWithoutID{FieldString: "teststring", FieldInt: 123, FieldBool: false, FieldFloat: 1.23, FieldTime: time.Date(2016, time.June, 1, 0, 0, 0, 0, time.UTC)}
 	err = ormTest.Save(&dslTestWithoutID)
 	if err.Error() != "Object table name (DSLTestWithoutID) is diferent from handler table name (DSLTest)" {
 		t.Fatalf("Want: `Object table name (DSLTestWithoutID) is diferent from handler table name (DSLTest)`, got: `%v`", err)
 	}
 
 	//save a new object
-	dslTest := DSLTest{FieldString: "teststring", FieldInt: 123, FieldBool: true}
+	dslTest := DSLTest{FieldString: "teststring", FieldInt: 123, FieldBool: true, FieldFloat: 1.23, FieldTime: time.Date(2016, time.June, 1, 0, 0, 0, 0, time.UTC)}
 	err = ormTest.Save(&dslTest)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
@@ -76,10 +77,10 @@ func TestSave(t *testing.T) {
 	}
 
 	//check if we got an error when trying to insert an object with negative ID
-	dslTestNegativeID := DSLTest{FieldString: "teststring", FieldInt: 123, FieldBool: true, FieldFloat: 1.23, ID: -1}
+	dslTestNegativeID := DSLTest{FieldString: "teststring", FieldInt: 123, FieldBool: true, FieldFloat: 1.23, FieldTime: time.Date(2016, time.June, 1, 0, 0, 0, 0, time.UTC), ID: -1}
 	err = ormTest.Save(&dslTestNegativeID)
-	if err.Error() != "Negative ID not allowed: {-1 teststring 123 true 1.23}" {
-		t.Fatalf("want: `Negative ID not allowed: {-1 teststring 123 true 1.23}`, got `%v`", err)
+	if err.Error() != "Negative ID not allowed: {-1 teststring 123 true 1.23 2016-06-01 00:00:00 +0000 UTC}" {
+		t.Fatalf("want: `Negative ID not allowed: {-1 teststring 123 true 1.23 2016-06-01 00:00:00 +0000 UTC}`, got `%v`", err)
 	}
 }
 
@@ -101,7 +102,7 @@ func TestInsertAndUpdate(t *testing.T) {
 	ormTest.CreateTable()
 
 	//create a test object
-	dslTest := DSLTest{FieldString: "teststring", FieldInt: 123, FieldBool: false, FieldFloat: 1.23}
+	dslTest := DSLTest{FieldString: "teststring", FieldInt: 123, FieldBool: false, FieldFloat: 1.23, FieldTime: time.Date(2016, time.June, 1, 0, 0, 0, 0, time.UTC)}
 	object := reflect.ValueOf(&dslTest).Elem()
 
 	//insert on db
@@ -137,10 +138,15 @@ func TestInsertAndUpdate(t *testing.T) {
 		t.Fatalf("want: 1.23, got: %v", obj.FieldFloat)
 	}
 
+	if !obj.FieldTime.Equal(time.Date(2016, time.June, 1, 0, 0, 0, 0, time.UTC)) {
+		t.Fatalf("want: `2016-06-01 00:00:00 +0000 UTC`, got: `%v`", obj.FieldTime)
+	}
+
 	//change FieldInt atribute
 	obj.FieldInt = 222
 	obj.FieldBool = true
 	obj.FieldFloat = 2.22
+	obj.FieldTime = time.Date(2016, time.June, 2, 0, 0, 0, 0, time.UTC)
 
 	//update on db
 	object = reflect.ValueOf(&obj).Elem()
@@ -170,6 +176,10 @@ func TestInsertAndUpdate(t *testing.T) {
 
 	if fmt.Sprintf("%.2f", obj.FieldFloat) != "2.22" {
 		t.Fatalf("want: 2.22, got: %v", obj.FieldFloat)
+	}
+
+	if !obj.FieldTime.Equal(time.Date(2016, time.June, 2, 0, 0, 0, 0, time.UTC)) {
+		t.Fatalf("want: `2016-06-02 00:00:00 +0000 UTC`, got: `%v`", obj.FieldTime)
 	}
 
 	//force a error on insert
@@ -203,13 +213,13 @@ func TestAssembleValuesArray(t *testing.T) {
 		t.Fatalf("err: %v", err)
 	}
 
-	argurmentsMap := []saveField{{name: "FieldString", fieldType: "string"}, {name: "FieldInt", fieldType: "int"}, {name: "FieldBool", fieldType: "bool"}, {name: "FieldFloat", fieldType: "float64"}, {name: "ID", fieldType: "int"}}
-	objectPtr := &DSLTest{ID: 1, FieldString: "teststring", FieldInt: 123, FieldBool: true, FieldFloat: 1.23}
+	argurmentsMap := []saveField{{name: "FieldString", fieldType: "string"}, {name: "FieldInt", fieldType: "int"}, {name: "FieldBool", fieldType: "bool"}, {name: "FieldFloat", fieldType: "float64"}, {name: "FieldTime", fieldType: "Time"}, {name: "ID", fieldType: "int"}}
+	objectPtr := &DSLTest{ID: 1, FieldString: "teststring", FieldInt: 123, FieldBool: true, FieldFloat: 1.23, FieldTime: time.Date(2016, time.June, 1, 0, 0, 0, 0, time.UTC)}
 	object := reflect.ValueOf(objectPtr).Elem()
 
 	res := ormTest.assembleValuesArray(argurmentsMap, object)
-	if len(res) != 5 {
-		t.Fatalf("want: 5, got: %v", len(res))
+	if len(res) != 6 {
+		t.Fatalf("want: 6, got: %v", len(res))
 	}
 
 	switch v := res[0].(type) {
@@ -250,10 +260,19 @@ func TestAssembleValuesArray(t *testing.T) {
 
 	switch v := res[4].(type) {
 	default:
+		t.Fatalf("want: Time, got: %v", v)
+	case time.Time:
+		if !(res[4].(time.Time)).Equal(time.Date(2016, time.June, 1, 0, 0, 0, 0, time.UTC)) {
+			t.Fatalf("want: `2016-06-01 00:00:00 +0000 UTC`, got: %v", res[4].(time.Time))
+		}
+	}
+
+	switch v := res[5].(type) {
+	default:
 		t.Fatalf("want: int, got: %v", v)
 	case int:
-		if res[4].(int) != 1 {
-			t.Fatalf("want: teststring, got: %v", res[4].(int))
+		if res[5].(int) != 1 {
+			t.Fatalf("want: teststring, got: %v", res[5].(int))
 		}
 	}
 }
@@ -264,7 +283,7 @@ func TestAssembleSQLInsertStatement(t *testing.T) {
 
 	//check if the sqlInsert string is assembled correctly
 	handler.assembleSQLInsert()
-	expected := `insert into DSLTest(FieldString, FieldInt, FieldBool, FieldFloat) values ($1, $2, $3, $4) RETURNING id;`
+	expected := `insert into DSLTest(FieldString, FieldInt, FieldBool, FieldFloat, FieldTime) values ($1, $2, $3, $4, $5) RETURNING id;`
 	got := handler.insertSQL
 	if got != expected {
 		t.Fatalf("\nExpected:\t %v\nGot:\t\t %v\n", expected, got)
@@ -272,24 +291,28 @@ func TestAssembleSQLInsertStatement(t *testing.T) {
 
 	//expectedMap := []saveField{}
 	mapInsert := handler.insertMap
-	if len(mapInsert) != 4 {
-		t.Fatalf("\nmapInsert lengh:\t %v\nWant:\t\t\t 4\n", len(mapInsert))
+	if len(mapInsert) != 5 {
+		t.Fatalf("want: 5, got: %v", len(mapInsert))
 	}
 
 	if mapInsert[0].name != "FieldString" || mapInsert[0].fieldType != "string" {
-		t.Fatalf("\nmapInsert[0] got:\t %v\nWant:\t\t\t {FieldString string}\n", mapInsert[0])
+		t.Fatalf("want: {FieldString string}, got: %v", mapInsert[0])
 	}
 
 	if mapInsert[1].name != "FieldInt" || mapInsert[1].fieldType != "int" {
-		t.Fatalf("\nmapInsert[1] got:\t %v\nWant:\t\t\t {FieldInt int}\n", mapInsert[1])
+		t.Fatalf("want: {FieldInt int}, got: %v", mapInsert[1])
 	}
 
 	if mapInsert[2].name != "FieldBool" || mapInsert[2].fieldType != "bool" {
-		t.Fatalf("\nmapInsert[2] got:\t %v\nWant:\t\t\t {FieldBool bool}\n", mapInsert[2])
+		t.Fatalf("want: {FieldBool bool}, got: %v", mapInsert[2])
 	}
 
 	if mapInsert[3].name != "FieldFloat" || mapInsert[3].fieldType != "float64" {
-		t.Fatalf("\nmapInsert[3] got:\t %v\nWant:\t\t\t {FieldBool bool}\n", mapInsert[3])
+		t.Fatalf("want: {FieldFloat float64}, got: %v", mapInsert[3])
+	}
+
+	if mapInsert[4].name != "FieldTime" || mapInsert[4].fieldType != "Time" {
+		t.Fatalf("want: {FieldTime Time}, got: %v", mapInsert[4])
 	}
 }
 
@@ -298,34 +321,38 @@ func TestAssembleSQLUpdate(t *testing.T) {
 	handler.table = DSLTest{}
 
 	handler.assembleSQLUpdate()
-	expected := `update DSLTest set FieldString = $1, FieldInt = $2, FieldBool = $3, FieldFloat = $4 where id = $5`
+	expected := `update DSLTest set FieldString = $1, FieldInt = $2, FieldBool = $3, FieldFloat = $4, FieldTime = $5 where id = $6`
 	got := handler.updateSQL
 	if got != expected {
-		t.Fatalf("\nExpected:\t %v\nGot:\t\t %v\n", expected, got)
+		t.Fatalf("want: %v, got: %v", expected, got)
 	}
 
 	updateMap := handler.updateMap
-	if len(updateMap) != 5 {
-		t.Fatalf("updateMap lenght: %v, want: 5", len(updateMap))
+	if len(updateMap) != 6 {
+		t.Fatalf("want: 6, got: %v", len(updateMap))
 	}
 
 	if updateMap[0].name != "FieldString" || updateMap[0].fieldType != "string" {
-		t.Fatalf("updateMap[0] got:\t %v\nWant:\t\t\t {FieldString string}\n", updateMap[0])
+		t.Fatalf("want: {FieldString string}, got: %v", updateMap[0])
 	}
 
 	if updateMap[1].name != "FieldInt" || updateMap[1].fieldType != "int" {
-		t.Fatalf("updateMap[1] got:\t %v\nWant:\t\t\t {FieldInt int}\n", updateMap[1])
+		t.Fatalf("want: {FieldInt int}, got: %v", updateMap[1])
 	}
 
 	if updateMap[2].name != "FieldBool" || updateMap[2].fieldType != "bool" {
-		t.Fatalf("updateMap[2] got: %v, want: {FieldBool bool}\n", updateMap[2])
+		t.Fatalf("want: {FieldBool bool}, got: %v", updateMap[2])
 	}
 
 	if updateMap[3].name != "FieldFloat" || updateMap[3].fieldType != "float64" {
-		t.Fatalf("updateMap[3] got: %v, want: {FieldBool float64}\n", updateMap[3])
+		t.Fatalf("want: {FieldBool float64}, got: %v", updateMap[3])
 	}
 
-	if updateMap[4].name != "ID" || updateMap[4].fieldType != "int" {
-		t.Fatalf("updateMap[4] got: %v, want: {ID int}\n", updateMap[3])
+	if updateMap[4].name != "FieldTime" || updateMap[4].fieldType != "Time" {
+		t.Fatalf("want: {FieldTime Time}, got: %v", updateMap[4])
+	}
+
+	if updateMap[5].name != "ID" || updateMap[5].fieldType != "int" {
+		t.Fatalf("want: {ID int}, got: %v", updateMap[5])
 	}
 }

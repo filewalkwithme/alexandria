@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"time"
 )
 
 type saveField struct {
@@ -81,6 +82,9 @@ func (handler Handler) assembleValuesArray(argurmentsMap []saveField, object ref
 		}
 		if argument.fieldType == "bool" {
 			values = append(values, bool(object.FieldByName(argument.name).Bool()))
+		}
+		if argument.fieldType == "Time" {
+			values = append(values, time.Time(object.FieldByName(argument.name).Interface().(time.Time)))
 		}
 	}
 	return values

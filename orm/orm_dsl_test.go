@@ -2,6 +2,7 @@ package orm
 
 import (
 	"testing"
+	"time"
 )
 
 //DSLTest is used to test SQL creation
@@ -11,6 +12,7 @@ type DSLTest struct {
 	FieldInt    int
 	FieldBool   bool
 	FieldFloat  float64
+	FieldTime   time.Time
 }
 
 //DSLTestWithoutID is used to test SQL creation
@@ -19,6 +21,7 @@ type DSLTestWithoutID struct {
 	FieldInt    int
 	FieldBool   bool
 	FieldFloat  float64
+	FieldTime   time.Time
 }
 
 func TestCreateTable(t *testing.T) {
@@ -89,7 +92,7 @@ func TestAssembleSQLCreateTable(t *testing.T) {
 	var handler Handler
 	handler.table = DSLTest{}
 
-	expected := `create table DSLTest (ID serial NOT NULL, FieldString character varying, FieldInt integer, FieldBool boolean, FieldFloat real, constraint DSLTest_pkey primary key (id));`
+	expected := `create table DSLTest (ID serial NOT NULL, FieldString character varying, FieldInt integer, FieldBool boolean, FieldFloat real, FieldTime timestamp without time zone, constraint DSLTest_pkey primary key (id));`
 	got, _ := handler.assembleSQLCreateTable()
 	if got != expected {
 		t.Fatalf("\nExpected:\t %v\nGot:\t\t %v\n", expected, got)
@@ -98,7 +101,7 @@ func TestAssembleSQLCreateTable(t *testing.T) {
 	handler.table = DSLTestWithoutID{}
 	got, err := handler.assembleSQLCreateTable()
 	if got != "" {
-		t.Fatalf("\nExpected:\t \"\"\nGot:\t\t %v\n", got)
+		t.Fatalf("want: \"\", got: %v", got)
 	}
 
 	if err.Error() != "ID field not found on struct DSLTestWithoutID" {
@@ -113,6 +116,6 @@ func TestAssembleSQLDropTable(t *testing.T) {
 	expected := `drop table DSLTest;`
 	got := handler.assembleSQLDropTable()
 	if got != expected {
-		t.Fatalf("\nExpected:\t %v\nGot:\t\t %v\n", expected, got)
+		t.Fatalf("want: %v, got: %v", expected, got)
 	}
 }

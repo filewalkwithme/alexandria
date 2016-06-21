@@ -3,6 +3,7 @@ package orm
 import (
 	"database/sql"
 	"reflect"
+	"time"
 )
 
 func (s Selecter) selectByID(id int) (interface{}, error) {
@@ -73,6 +74,9 @@ func (s Selecter) buildObject(fields []interface{}) interface{} {
 		if typeOfTable.Field(i).Type.Name() == "bool" {
 			vPtr.Elem().FieldByName(s.handler.selectFieldNamesMap[i]).SetBool(*(fields[i].(*bool)))
 		}
+		if typeOfTable.Field(i).Type.Name() == "Time" {
+			vPtr.Elem().FieldByName(s.handler.selectFieldNamesMap[i]).Set(reflect.ValueOf(*(fields[i].(*time.Time))))
+		}
 	}
 	return vPtr.Elem().Interface()
 }
@@ -100,6 +104,9 @@ func (handler *Handler) assembleSQLSelect() {
 		}
 		if typeOfTable.Field(i).Type.Name() == "bool" {
 			scanFieds[i] = new(bool)
+		}
+		if typeOfTable.Field(i).Type.Name() == "Time" {
+			scanFieds[i] = new(time.Time)
 		}
 
 		sqlInstruction = sqlInstruction + fieldName + ", "

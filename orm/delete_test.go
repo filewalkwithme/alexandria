@@ -2,6 +2,7 @@ package orm
 
 import (
 	"testing"
+	"time"
 )
 
 func TestDeleteByID(t *testing.T) {
@@ -19,7 +20,7 @@ func TestDeleteByID(t *testing.T) {
 	//check if the object is stored in the table and if the ID is populated after insert
 	ormTest.DropTable()
 	ormTest.CreateTable()
-	dslTest := DSLTest{FieldString: "teststring", FieldInt: 123, FieldBool: false, FieldFloat: 1.23}
+	dslTest := DSLTest{FieldString: "teststring", FieldInt: 123, FieldBool: false, FieldFloat: 1.23, FieldTime: time.Date(2016, time.June, 20, 0, 0, 0, 0, time.UTC)}
 	err = ormTest.Save(&dslTest)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
@@ -27,7 +28,7 @@ func TestDeleteByID(t *testing.T) {
 
 	id := dslTest.ID
 	if id != 1 {
-		t.Fatalf("\ndslTest.ID got:\t %v\nWant:\t\t\t 1\n", id)
+		t.Fatalf("want: 1, got: %v", id)
 	}
 
 	n, err := ormTest.Delete().ByID(id)
@@ -73,13 +74,13 @@ func TestDeleteWhere(t *testing.T) {
 	//check if the object is stored in the table and if the ID is populated after insert
 	ormTest.DropTable()
 	ormTest.CreateTable()
-	dslTest1 := DSLTest{FieldString: "teststring1", FieldInt: 111, FieldBool: true, FieldFloat: 1.11}
+	dslTest1 := DSLTest{FieldString: "teststring1", FieldInt: 111, FieldBool: true, FieldFloat: 1.11, FieldTime: time.Date(2016, time.June, 1, 0, 0, 0, 0, time.UTC)}
 	err = ormTest.Save(&dslTest1)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
 	}
 
-	dslTest2 := DSLTest{FieldString: "teststring2", FieldInt: 222, FieldBool: false, FieldFloat: 2.22}
+	dslTest2 := DSLTest{FieldString: "teststring2", FieldInt: 222, FieldBool: false, FieldFloat: 2.22, FieldTime: time.Date(2016, time.June, 2, 0, 0, 0, 0, time.UTC)}
 	err = ormTest.Save(&dslTest2)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
@@ -127,19 +128,19 @@ func TestDeleteAll(t *testing.T) {
 	//check if the object is stored in the table and if the ID is populated after insert
 	ormTest.DropTable()
 	ormTest.CreateTable()
-	dslTest1 := DSLTest{FieldString: "teststring1", FieldInt: 111, FieldBool: true, FieldFloat: 1.11}
+	dslTest1 := DSLTest{FieldString: "teststring1", FieldInt: 111, FieldBool: true, FieldFloat: 1.11, FieldTime: time.Date(2016, time.June, 1, 0, 0, 0, 0, time.UTC)}
 	err = ormTest.Save(&dslTest1)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
 	}
 
-	dslTest2 := DSLTest{FieldString: "teststring2", FieldInt: 222, FieldBool: false, FieldFloat: 2.22}
+	dslTest2 := DSLTest{FieldString: "teststring2", FieldInt: 222, FieldBool: false, FieldFloat: 2.22, FieldTime: time.Date(2016, time.June, 2, 0, 0, 0, 0, time.UTC)}
 	err = ormTest.Save(&dslTest2)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
 	}
 
-	dslTest3 := DSLTest{FieldString: "teststring3", FieldInt: 333, FieldBool: true, FieldFloat: 3.33}
+	dslTest3 := DSLTest{FieldString: "teststring3", FieldInt: 333, FieldBool: true, FieldFloat: 3.33, FieldTime: time.Date(2016, time.June, 3, 0, 0, 0, 0, time.UTC)}
 	err = ormTest.Save(&dslTest3)
 	if err != nil {
 		t.Fatalf("Err: %v", err)

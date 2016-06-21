@@ -62,6 +62,10 @@ func (handler Handler) assembleSQLCreateTable() (string, error) {
 			fieldType = "boolean"
 		}
 
+		if typeOfTable.Field(i).Type.Name() == "Time" {
+			fieldType = "timestamp without time zone"
+		}
+
 		if fieldName == "ID" {
 			idExists = true
 			fieldsList = fieldsList + fieldName + " serial NOT NULL, "

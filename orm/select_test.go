@@ -3,6 +3,7 @@ package orm
 import (
 	"fmt"
 	"testing"
+	"time"
 )
 
 func TestSelectByID(t *testing.T) {
@@ -22,7 +23,7 @@ func TestSelectByID(t *testing.T) {
 	ormTest.CreateTable()
 
 	//save a new object
-	dslTest := DSLTest{FieldString: "teststring", FieldInt: 123, FieldBool: true, FieldFloat: 1.23}
+	dslTest := DSLTest{FieldString: "teststring", FieldInt: 123, FieldBool: true, FieldFloat: 1.23, FieldTime: time.Date(2016, time.June, 1, 0, 0, 0, 0, time.UTC)}
 	err = ormTest.Save(&dslTest)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
@@ -59,6 +60,10 @@ func TestSelectByID(t *testing.T) {
 		t.Fatalf("want: 1.23 got `%v`", obj.FieldFloat)
 	}
 
+	if !obj.FieldTime.Equal(time.Date(2016, time.June, 1, 0, 0, 0, 0, time.UTC)) {
+		t.Fatalf("want: `2016-06-01 00:00:00 +0000 UTC` got `%v`", obj.FieldFloat)
+	}
+
 	//force a error on select
 	oldSelectSQL := ormTest.selectSQL
 	ormTest.selectSQL = "wrong-sql"
@@ -86,14 +91,14 @@ func TestSelectAll(t *testing.T) {
 	ormTest.CreateTable()
 
 	//save a new object - 1
-	dslTest1 := DSLTest{FieldString: "teststring1", FieldInt: 111, FieldBool: true, FieldFloat: 1.11}
+	dslTest1 := DSLTest{FieldString: "teststring1", FieldInt: 111, FieldBool: true, FieldFloat: 1.11, FieldTime: time.Date(2016, time.June, 1, 0, 0, 0, 0, time.UTC)}
 	err = ormTest.Save(&dslTest1)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
 	}
 
 	//save a new object - 2
-	dslTest2 := DSLTest{FieldString: "teststring2", FieldInt: 222, FieldBool: false, FieldFloat: 2.22}
+	dslTest2 := DSLTest{FieldString: "teststring2", FieldInt: 222, FieldBool: false, FieldFloat: 2.22, FieldTime: time.Date(2016, time.June, 2, 0, 0, 0, 0, time.UTC)}
 	err = ormTest.Save(&dslTest2)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
@@ -135,6 +140,10 @@ func TestSelectAll(t *testing.T) {
 		t.Fatalf("want: 1.11 got `%v`", obj1.FieldFloat)
 	}
 
+	if !obj1.FieldTime.Equal(time.Date(2016, time.June, 1, 0, 0, 0, 0, time.UTC)) {
+		t.Fatalf("want: `2016-06-01 00:00:00 +0000 UTC` got `%v`", obj1.FieldFloat)
+	}
+
 	obj2 := dslTestFindAll[1].(DSLTest)
 
 	if obj2.ID != 2 {
@@ -155,6 +164,10 @@ func TestSelectAll(t *testing.T) {
 
 	if fmt.Sprintf("%.2f", obj2.FieldFloat) != "2.22" {
 		t.Fatalf("want: 2.22 got `%v`", obj2.FieldFloat)
+	}
+
+	if !obj2.FieldTime.Equal(time.Date(2016, time.June, 2, 0, 0, 0, 0, time.UTC)) {
+		t.Fatalf("want: `2016-06-02 00:00:00 +0000 UTC` got `%v`", obj2.FieldFloat)
 	}
 
 	//force a error on select
@@ -184,28 +197,28 @@ func TestSelectWhere(t *testing.T) {
 	ormTest.CreateTable()
 
 	//save a new object - 1
-	dslTest1 := DSLTest{FieldString: "teststring1", FieldInt: 111, FieldBool: true, FieldFloat: 1.11}
+	dslTest1 := DSLTest{FieldString: "teststring1", FieldInt: 111, FieldBool: true, FieldFloat: 1.11, FieldTime: time.Date(2016, time.June, 1, 0, 0, 0, 0, time.UTC)}
 	err = ormTest.Save(&dslTest1)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
 	}
 
 	//save a new object - 2
-	dslTest2 := DSLTest{FieldString: "teststring2", FieldInt: 222, FieldBool: false, FieldFloat: 2.22}
+	dslTest2 := DSLTest{FieldString: "teststring2", FieldInt: 222, FieldBool: false, FieldFloat: 2.22, FieldTime: time.Date(2016, time.June, 2, 0, 0, 0, 0, time.UTC)}
 	err = ormTest.Save(&dslTest2)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
 	}
 
 	//save a new object - 3
-	dslTest3 := DSLTest{FieldString: "teststring3", FieldInt: 333, FieldBool: true, FieldFloat: 3.33}
+	dslTest3 := DSLTest{FieldString: "teststring3", FieldInt: 333, FieldBool: true, FieldFloat: 3.33, FieldTime: time.Date(2016, time.June, 3, 0, 0, 0, 0, time.UTC)}
 	err = ormTest.Save(&dslTest3)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
 	}
 
 	//save a new object - 4
-	dslTest4 := DSLTest{FieldString: "teststring4", FieldInt: 444, FieldBool: false, FieldFloat: 4.44}
+	dslTest4 := DSLTest{FieldString: "teststring4", FieldInt: 444, FieldBool: false, FieldFloat: 4.44, FieldTime: time.Date(2016, time.June, 4, 0, 0, 0, 0, time.UTC)}
 	err = ormTest.Save(&dslTest4)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
@@ -247,6 +260,10 @@ func TestSelectWhere(t *testing.T) {
 		t.Fatalf("want: 2.22 got `%v`", obj1.FieldFloat)
 	}
 
+	if !obj1.FieldTime.Equal(time.Date(2016, time.June, 2, 0, 0, 0, 0, time.UTC)) {
+		t.Fatalf("want: `2016-06-02 00:00:00 +0000 UTC` got `%v`", obj1.FieldFloat)
+	}
+
 	obj2 := dslTestFindAll[1].(DSLTest)
 
 	if obj2.ID != 3 {
@@ -269,6 +286,10 @@ func TestSelectWhere(t *testing.T) {
 		t.Fatalf("want: 3.33 got `%v`", obj2.FieldFloat)
 	}
 
+	if !obj2.FieldTime.Equal(time.Date(2016, time.June, 3, 0, 0, 0, 0, time.UTC)) {
+		t.Fatalf("want: `2016-06-03 00:00:00 +0000 UTC` got `%v`", obj2.FieldFloat)
+	}
+
 	obj3 := dslTestFindAll[2].(DSLTest)
 
 	if obj3.ID != 4 {
@@ -289,6 +310,10 @@ func TestSelectWhere(t *testing.T) {
 
 	if fmt.Sprintf("%.2f", obj3.FieldFloat) != "4.44" {
 		t.Fatalf("want: 4.44 got `%v`", obj3.FieldFloat)
+	}
+
+	if !obj3.FieldTime.Equal(time.Date(2016, time.June, 4, 0, 0, 0, 0, time.UTC)) {
+		t.Fatalf("want: `2016-06-04 00:00:00 +0000 UTC` got `%v`", obj3.FieldFloat)
 	}
 
 	//force a error on select
@@ -318,14 +343,14 @@ func TestBuildArrayOfObjects(t *testing.T) {
 	ormTest.CreateTable()
 
 	//save a new object - 1
-	dslTest1 := DSLTest{FieldString: "teststring1", FieldInt: 111, FieldBool: false, FieldFloat: 1.11}
+	dslTest1 := DSLTest{FieldString: "teststring1", FieldInt: 111, FieldBool: false, FieldFloat: 1.11, FieldTime: time.Date(2016, time.June, 1, 0, 0, 0, 0, time.UTC)}
 	err = ormTest.Save(&dslTest1)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
 	}
 
 	//save a new object - 2
-	dslTest2 := DSLTest{FieldString: "teststring2", FieldInt: 222, FieldBool: true, FieldFloat: 2.22}
+	dslTest2 := DSLTest{FieldString: "teststring2", FieldInt: 222, FieldBool: true, FieldFloat: 2.22, FieldTime: time.Date(2016, time.June, 2, 0, 0, 0, 0, time.UTC)}
 	err = ormTest.Save(&dslTest2)
 	if err != nil {
 		t.Fatalf("Err: %v", err)
@@ -372,6 +397,10 @@ func TestBuildArrayOfObjects(t *testing.T) {
 		t.Fatalf("want: 1.11 got `%v`", obj1.FieldFloat)
 	}
 
+	if !obj1.FieldTime.Equal(time.Date(2016, time.June, 1, 0, 0, 0, 0, time.UTC)) {
+		t.Fatalf("want: `2016-06-01 00:00:00 +0000 UTC` got `%v`", obj1.FieldFloat)
+	}
+
 	obj2 := objects[1].(DSLTest)
 
 	if obj2.ID != 2 {
@@ -394,6 +423,10 @@ func TestBuildArrayOfObjects(t *testing.T) {
 		t.Fatalf("want: 2.22 got `%v`", obj2.FieldFloat)
 	}
 
+	if !obj2.FieldTime.Equal(time.Date(2016, time.June, 2, 0, 0, 0, 0, time.UTC)) {
+		t.Fatalf("want: `2016-06-02 00:00:00 +0000 UTC` got `%v`", obj2.FieldFloat)
+	}
+
 	oldSelectScanMap := ormTest.selectScanMap
 	ormTest.selectScanMap = make([]interface{}, 0)
 	rows, err = ormTest.db.Query(ormTest.selectSQL)
@@ -403,8 +436,8 @@ func TestBuildArrayOfObjects(t *testing.T) {
 	defer rows.Close()
 
 	objects, err = ormTest.Select().buildArrayOfObjects(rows)
-	if err.Error() != "sql: expected 5 destination arguments in Scan, not 0" {
-		t.Fatalf("Expected: `sql: expected 5 destination arguments in Scan, not 0`, got: %v", err)
+	if err.Error() != "sql: expected 6 destination arguments in Scan, not 0" {
+		t.Fatalf("Expected: `sql: expected 6 destination arguments in Scan, not 0`, got: %v", err)
 	}
 	ormTest.selectScanMap = oldSelectScanMap
 }
@@ -425,17 +458,19 @@ func TestBuildObject(t *testing.T) {
 	ormTest.DropTable()
 	ormTest.CreateTable()
 
-	scan := make([]interface{}, 5)
+	scan := make([]interface{}, 6)
 	id := 1
 	fieldString := "teststring1"
 	fieldInt := 111
 	fieldBool := true
 	fieldFloat := 1.23
+	fieldTime := time.Date(2016, time.June, 1, 0, 0, 0, 0, time.UTC)
 	scan[0] = &id
 	scan[1] = &fieldString
 	scan[2] = &fieldInt
 	scan[3] = &fieldBool
 	scan[4] = &fieldFloat
+	scan[5] = &fieldTime
 
 	obj := (ormTest.Select().buildObject(scan).(DSLTest))
 
@@ -458,6 +493,11 @@ func TestBuildObject(t *testing.T) {
 	if fmt.Sprintf("%.2f", obj.FieldFloat) != "1.23" {
 		t.Fatalf("want: 1.23 got `%v`", obj.FieldFloat)
 	}
+
+	if !obj.FieldTime.Equal(time.Date(2016, time.June, 1, 0, 0, 0, 0, time.UTC)) {
+		t.Fatalf("want: `2016-06-01 00:00:00 +0000 UTC` got `%v`", obj.FieldFloat)
+	}
+
 }
 
 func TestAssembleSQLSelect(t *testing.T) {
@@ -472,12 +512,12 @@ func TestAssembleSQLSelect(t *testing.T) {
 		t.Fatalf("err: %v", err)
 	}
 
-	if ormTest.selectSQL != "select ID, FieldString, FieldInt, FieldBool, FieldFloat from DSLTest" {
-		t.Fatalf("Want: `select ID, FieldString, FieldInt, FieldBool, FieldFloat from DSLTest`, Got: `%v`", ormTest.selectSQL)
+	if ormTest.selectSQL != "select ID, FieldString, FieldInt, FieldBool, FieldFloat, FieldTime from DSLTest" {
+		t.Fatalf("Want: `select ID, FieldString, FieldInt, FieldBool, FieldFloat, FieldTime from DSLTest`, Got: `%v`", ormTest.selectSQL)
 	}
 
-	if len(ormTest.selectScanMap) != 5 {
-		t.Fatalf("Want: 5, Got: %v", len(ormTest.selectScanMap))
+	if len(ormTest.selectScanMap) != 6 {
+		t.Fatalf("Want: 6, Got: %v", len(ormTest.selectScanMap))
 	}
 
 	obj := (ormTest.Select().buildObject(ormTest.selectScanMap).(DSLTest))
@@ -502,8 +542,12 @@ func TestAssembleSQLSelect(t *testing.T) {
 		t.Fatalf("want: 0.00 got `%v`", obj.FieldFloat)
 	}
 
-	if len(ormTest.selectFieldNamesMap) != 5 {
-		t.Fatalf("Want: 5, Got: %v", len(ormTest.selectFieldNamesMap))
+	if !obj.FieldTime.Equal(time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)) {
+		t.Fatalf("want: `0001-01-01 00:00:00 +0000 UTC` got `%v`", obj.FieldFloat)
+	}
+
+	if len(ormTest.selectFieldNamesMap) != 6 {
+		t.Fatalf("Want: 6, Got: %v", len(ormTest.selectFieldNamesMap))
 	}
 
 	if ormTest.selectFieldNamesMap[0] != "ID" {
