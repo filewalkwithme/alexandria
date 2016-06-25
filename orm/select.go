@@ -62,20 +62,19 @@ func (s Selecter) buildObject(fields []interface{}) interface{} {
 	v := reflect.ValueOf(s.handler.table)
 	vPtr := reflect.New(v.Type())
 	for i := 0; i < typeOfTable.NumField(); i++ {
-		if typeOfTable.Field(i).Type.Name() == "int" {
+		switch typeOfTable.Field(i).Type.Name() {
+		case "int":
 			vPtr.Elem().FieldByName(s.handler.selectFieldNamesMap[i]).SetInt(int64(*(fields[i].(*int))))
-		}
-		if typeOfTable.Field(i).Type.Name() == "float64" {
+		case "float64":
 			vPtr.Elem().FieldByName(s.handler.selectFieldNamesMap[i]).SetFloat(float64(*(fields[i].(*float64))))
-		}
-		if typeOfTable.Field(i).Type.Name() == "string" {
+		case "string":
 			vPtr.Elem().FieldByName(s.handler.selectFieldNamesMap[i]).SetString(*(fields[i].(*string)))
-		}
-		if typeOfTable.Field(i).Type.Name() == "bool" {
+		case "bool":
 			vPtr.Elem().FieldByName(s.handler.selectFieldNamesMap[i]).SetBool(*(fields[i].(*bool)))
-		}
-		if typeOfTable.Field(i).Type.Name() == "Time" {
+		case "Time":
 			vPtr.Elem().FieldByName(s.handler.selectFieldNamesMap[i]).Set(reflect.ValueOf(*(fields[i].(*time.Time))))
+		default:
+			continue
 		}
 	}
 	return vPtr.Elem().Interface()
@@ -85,30 +84,28 @@ func (handler *Handler) assembleSQLSelect() {
 	typeOfTable := reflect.TypeOf(handler.table)
 	tableName := typeOfTable.Name()
 
-	var fieldNames = make([]string, typeOfTable.NumField())
-	var scanFieds = make([]interface{}, typeOfTable.NumField())
+	var fieldNames = make([]string, 0)
+	var scanFields = make([]interface{}, 0)
 
 	sqlInstruction := "select "
 	for i := 0; i < typeOfTable.NumField(); i++ {
+		switch typeOfTable.Field(i).Type.Name() {
+		case "int":
+			scanFields = append(scanFields, new(int))
+		case "float64":
+			scanFields = append(scanFields, new(float64))
+		case "string":
+			scanFields = append(scanFields, new(string))
+		case "bool":
+			scanFields = append(scanFields, new(bool))
+		case "Time":
+			scanFields = append(scanFields, new(time.Time))
+		default:
+			continue
+		}
+
 		fieldName := typeOfTable.Field(i).Name
-		fieldNames[i] = fieldName
-
-		if typeOfTable.Field(i).Type.Name() == "int" {
-			scanFieds[i] = new(int)
-		}
-		if typeOfTable.Field(i).Type.Name() == "float64" {
-			scanFieds[i] = new(float64)
-		}
-		if typeOfTable.Field(i).Type.Name() == "string" {
-			scanFieds[i] = new(string)
-		}
-		if typeOfTable.Field(i).Type.Name() == "bool" {
-			scanFieds[i] = new(bool)
-		}
-		if typeOfTable.Field(i).Type.Name() == "Time" {
-			scanFieds[i] = new(time.Time)
-		}
-
+		fieldNames = append(fieldNames, fieldName)
 		sqlInstruction = sqlInstruction + fieldName + ", "
 	}
 
@@ -116,6 +113,6 @@ func (handler *Handler) assembleSQLSelect() {
 	sqlInstruction = sqlInstruction + " from " + tableName
 
 	handler.selectSQL = sqlInstruction
-	handler.selectScanMap = scanFieds
+	handler.selectScanMap = scanFields
 	handler.selectFieldNamesMap = fieldNames
 }

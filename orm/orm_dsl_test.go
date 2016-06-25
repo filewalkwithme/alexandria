@@ -13,6 +13,12 @@ type DSLTest struct {
 	FieldBool   bool
 	FieldFloat  float64
 	FieldTime   time.Time
+	Items       []Item
+}
+
+type Item struct {
+	ID   int
+	Name string
 }
 
 //DSLTestWithoutID is used to test SQL creation

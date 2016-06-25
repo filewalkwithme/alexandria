@@ -79,8 +79,8 @@ func TestSave(t *testing.T) {
 	//check if we got an error when trying to insert an object with negative ID
 	dslTestNegativeID := DSLTest{FieldString: "teststring", FieldInt: 123, FieldBool: true, FieldFloat: 1.23, FieldTime: time.Date(2016, time.June, 1, 0, 0, 0, 0, time.UTC), ID: -1}
 	err = ormTest.Save(&dslTestNegativeID)
-	if err.Error() != "Negative ID not allowed: {-1 teststring 123 true 1.23 2016-06-01 00:00:00 +0000 UTC}" {
-		t.Fatalf("want: `Negative ID not allowed: {-1 teststring 123 true 1.23 2016-06-01 00:00:00 +0000 UTC}`, got `%v`", err)
+	if err.Error() != "Negative ID not allowed: {-1 teststring 123 true 1.23 2016-06-01 00:00:00 +0000 UTC []}" {
+		t.Fatalf("want: `Negative ID not allowed: {-1 teststring 123 true 1.23 2016-06-01 00:00:00 +0000 UTC []}`, got `%v`", err)
 	}
 }
 

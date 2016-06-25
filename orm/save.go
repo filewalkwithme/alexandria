@@ -71,20 +71,19 @@ func (handler Handler) assembleValuesArray(argurmentsMap []saveField, object ref
 	//build the values array
 	var values []interface{}
 	for _, argument := range argurmentsMap {
-		if argument.fieldType == "int" {
+		switch argument.fieldType {
+		case "int":
 			values = append(values, int(object.FieldByName(argument.name).Int()))
-		}
-		if argument.fieldType == "float64" {
+		case "float64":
 			values = append(values, float64(object.FieldByName(argument.name).Float()))
-		}
-		if argument.fieldType == "string" {
+		case "string":
 			values = append(values, string(object.FieldByName(argument.name).String()))
-		}
-		if argument.fieldType == "bool" {
+		case "bool":
 			values = append(values, bool(object.FieldByName(argument.name).Bool()))
-		}
-		if argument.fieldType == "Time" {
+		case "Time":
 			values = append(values, time.Time(object.FieldByName(argument.name).Interface().(time.Time)))
+		default:
+			continue
 		}
 	}
 	return values
@@ -95,6 +94,12 @@ func (handler Handler) assembleValuesArray(argurmentsMap []saveField, object ref
 func (handler *Handler) assembleSQLInsert() {
 	typeOfTable := reflect.TypeOf(handler.table)
 	tableName := typeOfTable.Name()
+	validTypes := make(map[string]bool)
+	validTypes["int"] = true
+	validTypes["float64"] = true
+	validTypes["string"] = true
+	validTypes["bool"] = true
+	validTypes["Time"] = true
 
 	sqlInstruction := "insert into " + tableName + "("
 
@@ -107,6 +112,10 @@ func (handler *Handler) assembleSQLInsert() {
 		fieldName := typeOfTable.Field(i).Name
 
 		if fieldName == "ID" {
+			continue
+		}
+
+		if !validTypes[typeOfTable.Field(i).Type.Name()] {
 			continue
 		}
 
@@ -129,6 +138,12 @@ func (handler *Handler) assembleSQLInsert() {
 func (handler *Handler) assembleSQLUpdate() {
 	typeOfTable := reflect.TypeOf(handler.table)
 	tableName := typeOfTable.Name()
+	validTypes := make(map[string]bool)
+	validTypes["int"] = true
+	validTypes["float64"] = true
+	validTypes["string"] = true
+	validTypes["bool"] = true
+	validTypes["Time"] = true
 
 	j := 1
 	sqlInstruction := "update " + tableName + " set "
@@ -137,6 +152,10 @@ func (handler *Handler) assembleSQLUpdate() {
 		fieldName := typeOfTable.Field(i).Name
 
 		if fieldName == "ID" {
+			continue
+		}
+
+		if !validTypes[typeOfTable.Field(i).Type.Name()] {
 			continue
 		}
 

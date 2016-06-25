@@ -49,21 +49,19 @@ func (handler Handler) assembleSQLCreateTable() (string, error) {
 	for i := 0; i < typeOfTable.NumField(); i++ {
 		fieldName := typeOfTable.Field(i).Name
 		fieldType := ""
-		if typeOfTable.Field(i).Type.Name() == "int" {
+		switch typeOfTable.Field(i).Type.Name() {
+		case "int":
 			fieldType = "integer"
-		}
-		if typeOfTable.Field(i).Type.Name() == "float64" {
+		case "float64":
 			fieldType = "real"
-		}
-		if typeOfTable.Field(i).Type.Name() == "string" {
+		case "string":
 			fieldType = "character varying"
-		}
-		if typeOfTable.Field(i).Type.Name() == "bool" {
+		case "bool":
 			fieldType = "boolean"
-		}
-
-		if typeOfTable.Field(i).Type.Name() == "Time" {
+		case "Time":
 			fieldType = "timestamp without time zone"
+		default:
+			continue
 		}
 
 		if fieldName == "ID" {
