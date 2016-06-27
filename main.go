@@ -3,24 +3,45 @@ package main
 import (
 	"fmt"
 	alexandria "github.com/maiconio/alexandria/orm"
+	"time"
 )
 
 //Book is on the table
 type Book struct {
-	ID    int
-	Name  string
-	Pages int
+	ID              int
+	Name            string
+	Pages           int
+	HardCover       bool
+	Price           float64
+	PublicationDate time.Time
+	Chapters        []Chapter
+	Authors         []Author
+}
+
+//Chapter one
+type Chapter struct {
+	ID   int
+	Name string
+}
+
+//Author ...
+type Author struct {
+	ID        int
+	FirstName string
+	LastName  string
 }
 
 func main() {
+
 	//connect to Postgres
-	orm, scream := alexandria.ConnectToPostgres()
+	orm, scream := alexandria.ConnectToPostgres("user=docker password=docker dbname=docker sslmode=disable")
 	if scream != nil {
 		panic(scream)
 	}
 
 	//create the orm handler for Book objects
-	ormBooks, scream := orm.NewHandler(Book{})
+	chap := Chapter{1, "chapter-name"}
+	ormBooks, scream := orm.NewHandler(Book{Chapters: []Chapter{chap}})
 	if scream != nil {
 		panic(scream)
 	}
@@ -28,32 +49,31 @@ func main() {
 	//Create Table
 	ormBooks.DropTable()
 	ormBooks.CreateTable()
-	book := Book{Name: "The book is on the table", Pages: 198}
-	err := ormBooks.Insert(&book)
-	fmt.Printf("err: %v\n", err)
-	fmt.Printf("book: %v\n", book)
 
-	/*
-		//Insert/update
-		ormBooks.Insert(Book{Name: "The book is on the table", Pages: 198})
+	//Insert
+	book := Book{Name: "The book is on the table", Pages: 198, HardCover: true, Price: 99.99, PublicationDate: time.Date(2016, time.June, 1, 0, 0, 0, 0, time.UTC)}
+	ormBooks.Save(&book)
 
-		//Update
-		ormBooks.Update().Where("pages > 0")
-		ormBooks.Update().ByID(9)
-		ormBooks.Update().All()
+	//Update
+	book.Name = "The book is on fire"
+	ormBooks.Save(&book)
 
+	//Select
+	selBook, _ := ormBooks.Select().ByID(1)
+	selBooks, _ := ormBooks.Select().Where("pages > 0")
+	selBooks, _ = ormBooks.Select().All()
 
-		//Select
-		ormBooks.Select().Where("pages > 0")
-		ormBooks.Select().ByID(9)
-		ormBooks.Select().All()
+	fmt.Printf("%v\n", selBook)
+	fmt.Printf("%v\n", selBooks)
 
-		//Delete
-		ormBooks.Delete().Where("id=9")
-		ormBooks.Delete().ByID(9)
-		ormBooks.Delete().All()
+	//Delete
+	ormBooks.Delete().ByID(1)
+	ormBooks.Delete().Where("id=9")
+	ormBooks.Delete().All()
 
-		//Drop Table
-		ormBooks.DropTable()
-	*/
+	//Drop Table
+	ormBooks.DropTable()
+
+	//orm.FreeQuery("Select foo from bar")
+
 }

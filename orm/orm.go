@@ -39,17 +39,24 @@ type Handler struct {
 	sqlCreateTable string
 	sqlDropTable   string
 
+	//insert
 	insertSQL string
 	insertMap []saveField
 
+	//update
 	updateSQL string
 	updateMap []saveField
 
+	//select
 	selectSQL           string
 	selectFieldNamesMap []string
 	selectScanMap       []interface{}
 
+	//delete
 	deleteSQL string
+
+	//child handlers
+	childHandlers []Handler
 }
 
 //NewHandler returns a Handler object to manipulate a given table
@@ -70,6 +77,9 @@ func (orm Orm) NewHandler(table interface{}) (Handler, error) {
 
 	//build sql update
 	handler.assembleSQLDelete()
+
+	//load child handlers
+	handler.detectChildHandlers(&orm)
 
 	return handler, nil
 }

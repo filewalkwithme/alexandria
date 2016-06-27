@@ -17,8 +17,9 @@ type DSLTest struct {
 }
 
 type Item struct {
-	ID   int
-	Name string
+	DSLTestID int
+	ID        int
+	Name      string
 }
 
 //DSLTestWithoutID is used to test SQL creation
