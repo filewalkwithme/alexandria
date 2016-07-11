@@ -56,7 +56,7 @@ type Handler struct {
 	deleteSQL string
 
 	//child handlers
-	childHandlers []Handler
+	childHandlers map[string]Handler
 }
 
 //NewHandler returns a Handler object to manipulate a given table
@@ -79,9 +79,9 @@ func (orm Orm) NewHandler(table interface{}) (Handler, error) {
 	handler.assembleSQLDelete()
 
 	//load child handlers
-	handler.detectChildHandlers(&orm)
+	err := handler.detectChildHandlers(&orm)
 
-	return handler, nil
+	return handler, err
 }
 
 //CreateTable is just a wrapper for the internal method createTable

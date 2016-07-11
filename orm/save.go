@@ -24,16 +24,26 @@ func (handler Handler) save(objectPtr interface{}) error {
 
 	id := object.FieldByName("ID").Int()
 
-	if id == 0 {
-		//insert
-		return handler.insert(object)
-	} else if id > 0 {
-		//update
-		return handler.update(object)
+	if id >= 0 {
+		var err error
+		if id == 0 {
+			//insert
+			err = handler.insert(object)
+		} else {
+			//update
+			err = handler.update(object)
+		}
+
+		err = handler.saveChilds(object)
+		if err != nil {
+			return err
+		}
 	} else {
 		//error
 		return fmt.Errorf("Negative ID not allowed: %v", object)
 	}
+
+	return nil
 }
 
 // insert takes an object, grab its fields and performs an INSERT operation
@@ -61,6 +71,74 @@ func (handler Handler) update(object reflect.Value) error {
 		return err
 	}
 
+	return nil
+}
+
+func (handler Handler) saveChilds(object reflect.Value) error {
+	typeOfTable := reflect.TypeOf(handler.table)
+	parentFieldName := typeOfTable.Name() + "ID"
+	parentID := object.FieldByName("ID").Int()
+
+	for fieldName := range handler.childHandlers {
+		field, exists := typeOfTable.FieldByName(fieldName)
+
+		if exists && field.Type.Kind().String() == "slice" {
+			fieldValue := object.FieldByName(fieldName)
+			elements := fieldValue.Len()
+			var ids string
+			for i := 0; i < elements; i++ {
+				obj := fieldValue.Index(i).Elem().Addr().Interface()
+				fieldValue.Index(i).Elem().FieldByName(parentFieldName).SetInt(parentID)
+				err := handler.childHandlers[fieldName].Save(obj)
+				if err != nil {
+					return err
+				}
+
+				v := reflect.ValueOf(obj)
+				ids = ids + strconv.Itoa(int(v.Elem().FieldByName("ID").Int())) + ", "
+			}
+			if len(ids) > 0 {
+				ids = ids[:len(ids)-2]
+			}
+
+			//delete old records
+			var err error
+			if len(ids) > 0 {
+				_, err = handler.childHandlers[fieldName].Delete().Where(fmt.Sprintf("%v = %v and id not in (%v)", parentFieldName, parentID, ids))
+			} else {
+				_, err = handler.childHandlers[fieldName].Delete().Where(fmt.Sprintf("%v = %v", parentFieldName, parentID))
+			}
+			if err != nil {
+				return err
+			}
+		}
+
+		if exists && field.Type.Kind().String() == "ptr" {
+			if object.FieldByName(fieldName).IsNil() {
+				_, err := handler.childHandlers[fieldName].Delete().Where(fmt.Sprintf("%v = %v", parentFieldName, parentID))
+				if err != nil {
+					return err
+				}
+			} else {
+				fieldValue := object.FieldByName(fieldName).Elem()
+				obj := fieldValue.Addr().Interface()
+
+				v := reflect.ValueOf(obj)
+				if v.Elem().FieldByName("ID").Int() <= 0 {
+					_, err := handler.childHandlers[fieldName].Delete().Where(fmt.Sprintf("%v = %v", parentFieldName, parentID))
+					if err != nil {
+						return err
+					}
+				}
+
+				fieldValue.FieldByName(parentFieldName).SetInt(parentID)
+				err := handler.childHandlers[fieldName].Save(obj)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
 	return nil
 }
 
