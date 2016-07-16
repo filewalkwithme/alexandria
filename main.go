@@ -75,24 +75,11 @@ func main() {
 	book.Author.FirstName = "maiconio"
 	ormBooks.Save(&book)
 
-	//Insert
-	//book = Book{Name: "The book is on the table", Pages: 198, HardCover: true, Price: 99.99, PublicationDate: time.Date(2016, time.June, 1, 0, 0, 0, 0, time.UTC), Chapters: []*Chapter{&Chapter{0, "chapter-one", 0}, &Chapter{0, "chapter-two", 0}}}
-	//err = ormBooks.Save(&book)
-	//if err != nil {
-	//	fmt.Printf("%v\n", err)
-	//	return
-	//}
-
-	//Insert
-	//book = Book{Name: "The book is on the table 2"}
-	//err = ormBooks.Save(&book)
-	//if err != nil {
-	//	fmt.Printf("%v\n", err)
-	//	return
-	//}
-
 	//Select
-	//selBook, _ := ormBooks.Select().ByID(1)
+	selBook, _ := ormBooks.Select().ByID(1)
+	fmt.Printf("selBook: %v\n", ((*selBook).(Book)).Chapters[0])
+	fmt.Printf("selBook: %v\n", ((*selBook).(Book)).Chapters[0])
+
 	//selBooks, _ := ormBooks.Select().Where("pages > 0")
 	//selBooks, _ = ormBooks.Select().All()
 

@@ -111,17 +111,17 @@ func (handler Handler) Select() Selecter {
 }
 
 //Where returns an array containing all results of a SELECT
-func (s Selecter) Where(where string, arguments ...interface{}) ([]interface{}, error) {
+func (s Selecter) Where(where string, arguments ...interface{}) ([]*interface{}, error) {
 	return s.selectWhere(where, arguments...)
 }
 
 //ByID returns an array containing all results of a SELECT
-func (s Selecter) ByID(id int) (interface{}, error) {
+func (s Selecter) ByID(id int) (*interface{}, error) {
 	return s.selectByID(id)
 }
 
 //All returns an array containing all results of a SELECT
-func (s Selecter) All() ([]interface{}, error) {
+func (s Selecter) All() ([]*interface{}, error) {
 	return s.selectAll()
 }
 
