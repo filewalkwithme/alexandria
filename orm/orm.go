@@ -2,6 +2,7 @@ package orm
 
 import (
 	"database/sql"
+	//"fmt"
 	"reflect"
 	//needed to access postgres
 	_ "github.com/lib/pq"
@@ -57,6 +58,8 @@ type Handler struct {
 
 	//child handlers
 	childHandlers map[string]Handler
+
+	object interface{}
 }
 
 //NewHandler returns a Handler object to manipulate a given table
@@ -106,22 +109,23 @@ type Selecter struct {
 }
 
 //Select returns a Finder object
-func (handler Handler) Select() Selecter {
+func (handler Handler) Select(obj interface{}) Selecter {
+	handler.object = obj
 	return Selecter{handler: handler}
 }
 
 //Where returns an array containing all results of a SELECT
-func (s Selecter) Where(where string, arguments ...interface{}) ([]*interface{}, error) {
+func (s Selecter) Where(where string, arguments ...interface{}) error {
 	return s.selectWhere(where, arguments...)
 }
 
 //ByID returns an array containing all results of a SELECT
-func (s Selecter) ByID(id int) (*interface{}, error) {
+func (s Selecter) ByID(id int) error {
 	return s.selectByID(id)
 }
 
 //All returns an array containing all results of a SELECT
-func (s Selecter) All() ([]*interface{}, error) {
+func (s Selecter) All() (interface{}, error) {
 	return s.selectAll()
 }
 

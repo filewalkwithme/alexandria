@@ -62,6 +62,8 @@ func main() {
 
 	//Insert
 	book := Book{Name: "The book is on the table", Pages: 198, HardCover: true, Price: 99.99, PublicationDate: time.Date(2016, time.June, 1, 0, 0, 0, 0, time.UTC), Chapters: []*Chapter{&Chapter{0, "chapter-one", 0}, &Chapter{0, "chapter-two", 0}}, Author: &Author{0, "Maicon", "Costa", 0}}
+	//book := Book{Name: "The book is on the table", Pages: 198, HardCover: true, Price: 99.99, PublicationDate: time.Date(2016, time.June, 1, 0, 0, 0, 0, time.UTC), Chapters: []*Chapter{&Chapter{0, "chapter-one", 0}, &Chapter{0, "chapter-two", 0}}}
+	//book := Book{Name: "The book is on the table", Pages: 198, HardCover: true, Price: 99.99, PublicationDate: time.Date(2016, time.June, 1, 0, 0, 0, 0, time.UTC)}
 	err := ormBooks.Save(&book)
 	if err != nil {
 		fmt.Printf("%v\n", err)
@@ -72,13 +74,17 @@ func main() {
 	book.Name = "The book is on fire"
 	ormBooks.Save(&book)
 
-	book.Author.FirstName = "maiconio"
+	//book.Author.FirstName = "maiconio"
 	ormBooks.Save(&book)
 
 	//Select
-	selBook, _ := ormBooks.Select().ByID(1)
-	fmt.Printf("selBook: %v\n", ((*selBook).(Book)).Chapters[0])
-	fmt.Printf("selBook: %v\n", ((*selBook).(Book)).Chapters[0])
+	selBook := new(Book)
+	ormBooks.Select(selBook).ByID(1)
+	fmt.Printf("selBook: %v\n", *selBook)
+
+	var selBooks []*Book
+	ormBooks.Select(&selBooks).Where("id = 1")
+	fmt.Printf("selBooks: %v\n", selBooks[0])
 
 	//selBooks, _ := ormBooks.Select().Where("pages > 0")
 	//selBooks, _ = ormBooks.Select().All()
